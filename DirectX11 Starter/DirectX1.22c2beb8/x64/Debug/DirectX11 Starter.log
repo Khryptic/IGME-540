@@ -1,0 +1,11 @@
+﻿  compilation object save succeeded; see E:\School\IGME-540\DirectX11 Starter\x64\Debug\PixelShader.cso
+  compilation object save succeeded; see E:\School\IGME-540\DirectX11 Starter\x64\Debug\VertexShader.cso
+  Game.cpp
+  Graphics.cpp
+  Input.cpp
+  Main.cpp
+  PathHelpers.cpp
+  Window.cpp
+  Generating Code...
+     Creating library E:\School\IGME-540\DirectX11 Starter\x64\Debug\DirectX11 Starter.lib and object E:\School\IGME-540\DirectX11 Starter\x64\Debug\DirectX11 Starter.exp
+  DirectX11 Starter.vcxproj -> E:\School\IGME-540\DirectX11 Starter\x64\Debug\DirectX11 Starter.exe
