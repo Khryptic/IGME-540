@@ -364,12 +364,19 @@ void Game::ImGuiRefresh(float deltaTime) {
 /// Builds UI with Current Data
 /// -----------------------------
 void Game::BuildUI() {
-	// Replace the %f with the next parameter, and format as a float
-	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
+	//Create new Window
+	ImGui::Begin("DirectX Inspector");
 
-	// Replace each %d with the next parameter, and format as decimal integers
-	// The "x" will be printed as-is between the numbers, like so: 800x600
-	ImGui::Text("Window Resolution: %dx%d", Window::Width(), Window::Height());
+	// Window Details Menu
+	if (ImGui::CollapsingHeader("Window Details", 1)) {
+		// Replace the %f with the next parameter, and format as a float
+		ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
 
+		// Replace each %d with the next parameter, and format as decimal integers
+		// The "x" will be printed as-is between the numbers, like so: 800x600
+		ImGui::Text("Window Resolution: %dx%d", Window::Width(), Window::Height());
+	}
 
+	//End current window
+	ImGui::End();
 }
