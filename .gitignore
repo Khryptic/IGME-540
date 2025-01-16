@@ -32,6 +32,6 @@
 *.app
 
 # Folders
-*.vs/
-*x64/Debug
-*x64/Release
+.vs/
+x64/Debug
+x64/Release
