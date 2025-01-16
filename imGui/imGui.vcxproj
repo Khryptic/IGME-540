@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{504ee160-a9fa-4001-9474-c5642d015d53}</ProjectGuid>
-    <RootNamespace>Dear_ImGUI_User_Interface</RootNamespace>
+    <ProjectGuid>{e4ae71e4-c00b-43ea-824b-5b4e57cc9b57}</ProjectGuid>
+    <RootNamespace>imGui</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
