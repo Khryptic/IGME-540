@@ -1,5 +1,5 @@
-﻿  compilation object save succeeded; see D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\PixelShader.cso
-  compilation object save succeeded; see D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\VertexShader.cso
+﻿  compilation object save succeeded; see E:\School\IGME-540\imGUI\x64\Debug\PixelShader.cso
+  compilation object save succeeded; see E:\School\IGME-540\imGUI\x64\Debug\VertexShader.cso
   Game.cpp
   Graphics.cpp
   Input.cpp
@@ -7,5 +7,5 @@
   PathHelpers.cpp
   Window.cpp
   Generating Code...
-     Creating library D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\imGUI.lib and object D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\imGUI.exp
-  imGUI.vcxproj -> D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\imGUI.exe
+     Creating library E:\School\IGME-540\imGUI\x64\Debug\imGUI.lib and object E:\School\IGME-540\imGUI\x64\Debug\imGUI.exp
+  imGUI.vcxproj -> E:\School\IGME-540\imGUI\x64\Debug\imGUI.exe
