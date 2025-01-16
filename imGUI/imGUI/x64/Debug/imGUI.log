@@ -1,0 +1,11 @@
+﻿  compilation object save succeeded; see D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\PixelShader.cso
+  compilation object save succeeded; see D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\VertexShader.cso
+  Game.cpp
+  Graphics.cpp
+  Input.cpp
+  Main.cpp
+  PathHelpers.cpp
+  Window.cpp
+  Generating Code...
+     Creating library D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\imGUI.lib and object D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\imGUI.exp
+  imGUI.vcxproj -> D:\Profiles\emn5100\Documents\IGME 540\imGUI\x64\Debug\imGUI.exe
