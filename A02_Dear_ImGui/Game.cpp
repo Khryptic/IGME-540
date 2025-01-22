@@ -23,8 +23,11 @@ using namespace DirectX;
 
 // Namespace to store ImGui variables
 namespace {
-	bool showDemo = 0;
+	bool showDemo = 0;	// Whether or not to show demo window
+	const char* starterNames[] = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" }; // Popup list options
+	int selectedStarter = -1; // Index of chosen name
 	ImVec4 windowColor(1.0f, 0.0f, 0.0f, 1.0f); // Color Vector
+	bool stopConfirmation = 0;
 }
 
 // --------------------------------------------------------
@@ -370,7 +373,7 @@ void Game::ImGuiRefresh(float deltaTime) {
 void Game::BuildUI() {
 
 	//Create new Window
-	ImGui::Begin("DirectX Inspector");
+	ImGui::Begin("DirectX 11 Inspector");
 
 	// Window Details Menu
 	if (ImGui::CollapsingHeader("Window Details", 1)) {
@@ -392,18 +395,76 @@ void Game::BuildUI() {
 		}
 	}
 
-	//
+	// Popup Menu
+	if (ImGui::CollapsingHeader("Popup Menu")) {
 
-	ImGui::Text("");	// Separation buffer
+		// Brings up list of Gen 1 starters
+		if (ImGui::Button("Choose Starter...")) {
+			ImGui::OpenPopup("starters");
+		}
 
-	// Changes whether or not demo window will be shown
+		ImGui::SameLine();
+		ImGui::TextUnformatted(selectedStarter == -1 ? "None" : starterNames[selectedStarter]); // Starter selection display
+
+		// Create popup menu
+		if (ImGui::BeginPopup("starters")) {
+			ImGui::SeparatorText("Starters");
+			for (int i = 0; i < IM_ARRAYSIZE(starterNames); i++) {
+				if (ImGui::Selectable(starterNames[i])) {
+					selectedStarter = i;
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+
+	ImGui::NewLine();	// Separation buffer
+
+	// Changes whether or not demo window will be shown with a popup
 	if(ImGui::Button("Toggle ImGui Demo Window")) {
-		showDemo = !showDemo;
+		if (stopConfirmation == false) {
+			ImGui::OpenPopup("Confirmation");
+		}
+		
+		else {
+			showDemo = !showDemo;
+		}
+	}
+
+	// Center Popup
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	// Display confirmation popup if confirmation window is allowed
+	if (ImGui::BeginPopupModal("Confirmation", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Are you sure?");
+		ImGui::Separator();
+
+		ImGui::Checkbox("Don't ask again", &stopConfirmation); // Confirmation checkbox to show again
+
+		// Toggle ImGui demo window
+		if (ImGui::Button("Toggle Window")) {
+			showDemo = !showDemo;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+
+		if (ImGui::Button("Don't Toggle")) {
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
 	}
 
 	// Shows or hides demo window
 	if (showDemo) {
 		ImGui::ShowDemoWindow();
+	}
+
+		// Reset Stop Confirmation to false
+	if (ImGui::Button("Reset Confirmation")) {
+		stopConfirmation = false;
 	}
 
 	//End current window
