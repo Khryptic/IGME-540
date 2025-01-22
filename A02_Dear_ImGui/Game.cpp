@@ -21,8 +21,9 @@ using namespace DirectX;
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
 
-// Namespace to store window color variables
+// Namespace to store ImGui variables
 namespace {
+	bool showDemo = 0;
 	ImVec4 windowColor(1.0f, 0.0f, 0.0f, 1.0f); // Color Vector
 }
 
@@ -265,7 +266,6 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	ImGuiRefresh(deltaTime);
-	BuildUI();
 	
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -361,8 +361,7 @@ void Game::ImGuiRefresh(float deltaTime) {
 	Input::SetKeyboardCapture(io.WantCaptureKeyboard);
 	Input::SetMouseCapture(io.WantCaptureMouse);
 
-	// Show the demo window
-	ImGui::ShowDemoWindow();
+	Game::BuildUI();
 }	
 
 /// -----------------------------
@@ -393,9 +392,18 @@ void Game::BuildUI() {
 		}
 	}
 
+	//
+
 	ImGui::Text("");	// Separation buffer
 
-	if(ImGui::Button("Disable ImGui Demo Window")) {
+	// Changes whether or not demo window will be shown
+	if(ImGui::Button("Toggle ImGui Demo Window")) {
+		showDemo = !showDemo;
+	}
+
+	// Shows or hides demo window
+	if (showDemo) {
+		ImGui::ShowDemoWindow();
 	}
 
 	//End current window
