@@ -21,6 +21,11 @@ using namespace DirectX;
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
 
+// Namespace to store window color variables
+namespace {
+	ImVec4 windowColor(1.0f, 0.0f, 0.0f, 1.0f); // Color Vector
+}
+
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
 // are initialized but before the game loop begins
@@ -364,6 +369,7 @@ void Game::ImGuiRefresh(float deltaTime) {
 /// Builds UI with Current Data
 /// -----------------------------
 void Game::BuildUI() {
+
 	//Create new Window
 	ImGui::Begin("DirectX Inspector");
 
@@ -375,6 +381,21 @@ void Game::BuildUI() {
 		// Replace each %d with the next parameter, and format as decimal integers
 		// The "x" will be printed as-is between the numbers, like so: 800x600
 		ImGui::Text("Window Resolution: %dx%d", Window::Width(), Window::Height());
+	}
+
+	// Color Picker Menu
+	if (ImGui::CollapsingHeader("Color Picker", 1)) {
+		ImGui::ColorEdit4("Window Color Editor", (float*)&windowColor);	//Color Picker
+
+		// Button to set background color
+		if (ImGui::Button("Set Background Color")) {
+			ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = windowColor;
+		}
+	}
+
+	ImGui::Text("");	// Separation buffer
+
+	if(ImGui::Button("Disable ImGui Demo Window")) {
 	}
 
 	//End current window
