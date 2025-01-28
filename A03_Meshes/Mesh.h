@@ -7,17 +7,20 @@ class Mesh
 {
 public:
 	// Basic OOP Setup
-	Mesh(unsigned int vertexCount, unsigned int indexCount);	// Constructor
-	~Mesh();								// Destructor will not need code due to smart pointers
+	Mesh(unsigned int vertexCount, unsigned int indexCount,
+		struct Vertex vertices[], unsigned int indices[]);	// Constructor
+	~Mesh();								// Destructor
 	Mesh(const Mesh&) = delete;				// Remove copy constructor
 	Mesh& operator=(const Mesh&) = delete;	// Remove copy-assignment operator
 
 
 	// Getters
-	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
-	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
-	unsigned int GetIndexCount();
-	unsigned int GetVertexCount();
+	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer() { return vertexBuffer; }
+	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer() { return indexBuffer; }
+
+	unsigned int GetIndexCount() { return indexCount; }
+	unsigned int GetVertexCount() { return vertexCount; }
+
 	void Draw();
 
 private:
