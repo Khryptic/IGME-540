@@ -22,8 +22,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{499f9319-31c0-47c6-8e3e-a9deec154905}</ProjectGuid>
-    <RootNamespace>A02_Dear_ImGui</RootNamespace>
+    <RootNamespace>A03_Meshes</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>A03_Meshes</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -166,6 +167,7 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PathHelpers.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -181,6 +183,7 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="PathHelpers.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window.h" />
