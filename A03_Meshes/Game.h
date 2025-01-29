@@ -1,7 +1,9 @@
 #pragma once
-
 #include <d3d11.h>
 #include <wrl/client.h>
+#include <memory>
+#include "Mesh.h"
+#include <vector>
 
 class Game
 {
@@ -41,5 +43,13 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+
+	// Shared Pointers
+	std::shared_ptr<Mesh> triangle;
+	std::shared_ptr<Mesh> box;
+	std::shared_ptr<Mesh> crown;
+
+	// Vector to hold pointers
+	std::shared_ptr<Mesh> meshes[3] = {triangle, box, crown};
 };
 
