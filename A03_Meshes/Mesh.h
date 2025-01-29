@@ -7,7 +7,7 @@ class Mesh
 {
 public:
 	// Basic OOP Setup
-	Mesh(unsigned int vertexCount, unsigned int indexCount,
+	Mesh(const char* name, unsigned int vertexCount, unsigned int indexCount,
 		struct Vertex vertices[], unsigned int indices[]);	// Constructor
 	~Mesh();								// Destructor
 	Mesh(const Mesh&) = delete;				// Remove copy constructor
@@ -20,6 +20,7 @@ public:
 
 	unsigned int GetIndexCount() { return indexCount; }
 	unsigned int GetVertexCount() { return vertexCount; }
+	const char* GetName() { return name; }
 
 	void Draw();
 
@@ -31,5 +32,6 @@ private:
 	// Mesh data
 	unsigned int indexCount;	// Used when drawing
 	unsigned int vertexCount;	// Good for the UI
+	const char* name;			// Name of Mesh
 };
 

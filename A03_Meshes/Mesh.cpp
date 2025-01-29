@@ -3,9 +3,10 @@
 #include "Graphics.h"
 
 // Constructor
-Mesh::Mesh(unsigned int vertexCount, unsigned int indexCount, struct Vertex vertices[], unsigned int indices[]) {
+Mesh::Mesh(const char* name, unsigned int vertexCount, unsigned int indexCount, struct Vertex vertices[], unsigned int indices[]) {
 	this->indexCount = indexCount;
 	this->vertexCount = vertexCount;
+	this->name = name;
 
 	// Create a VERTEX BUFFER
 	// - This holds the vertex data of triangles for a single object

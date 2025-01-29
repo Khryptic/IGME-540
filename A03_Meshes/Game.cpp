@@ -174,6 +174,8 @@ void Game::CreateGeometry()
 	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 	XMFLOAT4 yellow = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
 	XMFLOAT4 purple = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	XMFLOAT4 white = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4 black = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in CPU memory
@@ -189,17 +191,17 @@ void Game::CreateGeometry()
 	//    since we're describing the triangle in terms of the window itself
 	Vertex verticesTri[] =
 	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
+		{ XMFLOAT3(+0.6f, +0.9f, +0.0f), red },
+		{ XMFLOAT3(+0.8f, +0.6f, +0.0f), green },
+		{ XMFLOAT3(+0.4f, +0.6f, +0.0f), yellow },
 	};
 
 	Vertex verticesBox[] =
 	{
-		{ XMFLOAT3(+0.5f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
-		{ XMFLOAT3(-0.5f, +0.5f, +0.0f), yellow },
+		{ XMFLOAT3(-0.8f, +0.8f, +0.0f), black },
+		{ XMFLOAT3(-0.8f, +0.4f, +0.0f), blue },
+		{ XMFLOAT3(-0.6f, +0.8f, +0.0f), white },
+		{ XMFLOAT3(-0.6f, +0.4f, +0.0f), red },
 	};
 
 	Vertex verticesCrown[] =
@@ -217,14 +219,14 @@ void Game::CreateGeometry()
 	//    in the correct order and each one will be used exactly once
 	// - But just to see how it's done...
 	unsigned int indicesTri[] = { 0, 1, 2 };
-	unsigned int indicesBox[] = { 0, 1, 2, 0, 2, 3 };
+	unsigned int indicesBox[] = { 0, 2, 1, 3, 1, 2};
 	unsigned int indicesCrown[] = { 0, 1, 2, 3, 1, 2, 4, 1, 2};
 
-	triangle = std::make_shared<Mesh>((unsigned int) std::size(verticesTri), (unsigned int) std::size(indicesTri), 
+	triangle = std::make_shared<Mesh>("Triangle", (unsigned int)std::size(verticesTri), (unsigned int)std::size(indicesTri),
 		verticesTri, indicesTri);
-	box = std::make_shared<Mesh>((unsigned int) std::size(verticesBox), (unsigned int) std::size(indicesBox), 
+	box = std::make_shared<Mesh>("Box", (unsigned int)std::size(verticesBox), (unsigned int)std::size(indicesBox),
 		verticesBox, indicesBox);
-	crown = std::make_shared<Mesh>((unsigned int) std::size(verticesCrown), (unsigned int) std::size(indicesCrown), 
+	crown = std::make_shared<Mesh>("Crown", (unsigned int)std::size(verticesCrown), (unsigned int)std::size(indicesCrown),
 		verticesCrown, indicesCrown);
 }
 
@@ -266,37 +268,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// DRAW geometry
-	// - These steps are generally repeated for EACH object you draw
-	// - Other Direct3D calls will also be necessary to do more complex things
-	//{
-	//	// Set buffers in the input assembler (IA) stage
-	//	//  - Do this ONCE PER OBJECT, since each object may have different geometry
-	//	//  - For this demo, this step *could* simply be done once during Init()
-	//	//  - However, this needs to be done between EACH DrawIndexed() call
-	//	//     when drawing different geometry, so it's here as an example
-	//	UINT stride = sizeof(Vertex);
-	//	UINT offset = 0;
-	//	Graphics::Context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	//	Graphics::Context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	//
-	//	// Tell Direct3D to draw
-	//	//  - Begins the rendering pipeline on the GPU
-	//	//  - Do this ONCE PER OBJECT you intend to draw
-	//	//  - This will use all currently set Direct3D resources (shaders, buffers, etc)
-	//	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-	//	//     vertices in the currently set VERTEX BUFFER
-	//	Graphics::Context->DrawIndexed(
-	//		3,     // The number of indices to use (we could draw a subset if we wanted)
-	//		0,     // Offset to the first index we want to use
-	//		0);    // Offset to add to each index when looking up vertices
-	//}
-
 	// Draw Meshes
 	{
-		//for (std::shared_ptr<Mesh> mesh : meshes) {
-		//	mesh->Draw();
-		//}
+		triangle->Draw();
 		box->Draw();
 		crown->Draw();
 	}
@@ -400,6 +374,14 @@ void Game::BuildUI() {
 			}
 
 			ImGui::EndPopup();
+		}
+	}
+	
+	if (ImGui::CollapsingHeader("Meshes", 1)) {
+		for (int i = 0; i < std::size(meshes); i++) {
+			if (ImGui::CollapsingHeader(meshes[i]->GetName()), 1) {
+				ImGui::Text("Triangles: %i", meshes[i]->GetIndexCount() / 3);
+			}
 		}
 	}
 
