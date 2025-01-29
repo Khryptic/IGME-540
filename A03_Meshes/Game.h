@@ -50,6 +50,6 @@ private:
 	std::shared_ptr<Mesh> crown;
 
 	// Vector to hold pointers
-	std::shared_ptr<Mesh> meshes[3] = {triangle, box, crown};
+	std::shared_ptr<Mesh> meshes[3];
 };
 

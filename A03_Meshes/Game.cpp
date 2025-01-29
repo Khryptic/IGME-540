@@ -228,6 +228,10 @@ void Game::CreateGeometry()
 		verticesBox, indicesBox);
 	crown = std::make_shared<Mesh>("Crown", (unsigned int)std::size(verticesCrown), (unsigned int)std::size(indicesCrown),
 		verticesCrown, indicesCrown);
+
+	meshes[0] = triangle;
+	meshes[1] = box;
+	meshes[2] = crown;
 }
 
 
@@ -354,7 +358,7 @@ void Game::BuildUI() {
 	}
 
 	// Popup Menu
-	if (ImGui::CollapsingHeader("Popup Menu")) {
+	if (ImGui::CollapsingHeader("Popup Menu", 1)) {
 
 		// Brings up list of Gen 1 starters
 		if (ImGui::Button("Choose Starter...")) {
@@ -379,8 +383,12 @@ void Game::BuildUI() {
 	
 	if (ImGui::CollapsingHeader("Meshes", 1)) {
 		for (int i = 0; i < std::size(meshes); i++) {
-			if (ImGui::CollapsingHeader(meshes[i]->GetName()), 1) {
+			if (ImGui::TreeNode(meshes[i]->GetName())) {
 				ImGui::Text("Triangles: %i", meshes[i]->GetIndexCount() / 3);
+				ImGui::Text("Vertices: %i", meshes[i]->GetVertexCount());
+				ImGui::Text("Indices: %i", meshes[i]->GetIndexCount());
+				ImGui::TreePop();
+				ImGui::NewLine();	// Separation buffer
 			}
 		}
 	}
