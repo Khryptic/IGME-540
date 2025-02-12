@@ -6,6 +6,7 @@
 #include "Window.h"
 #include <vector>
 #include "BufferStructs.h"
+#include "Transform.h"
 
 #include <DirectXMath.h>
 
@@ -49,7 +50,7 @@ void Game::Initialize()
 
 	// Set Constant Buffer values
 	constBufferStruct.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
-	constBufferStruct.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
+	XMStoreFloat4x4(&constBufferStruct.world, DirectX::XMMatrixIdentity());
 
 	// Get size of buffer
 	// - Can only be a multiple of 16
@@ -214,17 +215,17 @@ void Game::CreateGeometry()
 	//    since we're describing the triangle in terms of the window itself
 	Vertex verticesTri[] =
 	{
-		{ XMFLOAT3(+0.6f, +0.9f, +0.0f), red },
-		{ XMFLOAT3(+0.8f, +0.6f, +0.0f), green },
-		{ XMFLOAT3(+0.4f, +0.6f, +0.0f), yellow },
+		{ XMFLOAT3(+0.0f, +0.1f, +0.0f), red },
+		{ XMFLOAT3(+0.1f, -0.1f, +0.0f), green },
+		{ XMFLOAT3(-0.1f, -0.1f, +0.0f), yellow },
 	};
 
 	Vertex verticesBox[] =
 	{
-		{ XMFLOAT3(-0.8f, +0.8f, +0.0f), black },
-		{ XMFLOAT3(-0.8f, +0.4f, +0.0f), blue },
-		{ XMFLOAT3(-0.6f, +0.8f, +0.0f), white },
-		{ XMFLOAT3(-0.6f, +0.4f, +0.0f), red },
+		{ XMFLOAT3(-0.2f, +0.2f, +0.0f), black },
+		{ XMFLOAT3(-0.2f, -0.2f, +0.0f), blue },
+		{ XMFLOAT3(+0.2f, +0.2f, +0.0f), white },
+		{ XMFLOAT3(+0.2f, -0.2f, +0.0f), red },
 	};
 
 	Vertex verticesCrown[] =
@@ -252,9 +253,17 @@ void Game::CreateGeometry()
 	crown = std::make_shared<Mesh>("Crown", (unsigned int)std::size(verticesCrown), (unsigned int)std::size(indicesCrown),
 		verticesCrown, indicesCrown);
 
-	meshes[0] = triangle;
-	meshes[1] = box;
-	meshes[2] = crown;
+	meshes.push_back(GameEntity(*triangle));
+	meshes.push_back(GameEntity(*triangle));
+	meshes.push_back(GameEntity(*box));
+	meshes.push_back(GameEntity(*box));
+	meshes.push_back(GameEntity(*crown));
+
+	// Move some meshes
+	meshes[0].GetTransform()->SetPosition(XMFLOAT3(-0.3f, 0.5f, 0.0f));
+	meshes[1].GetTransform()->SetPosition(XMFLOAT3(-0.8f, -0.8f, 0.0f));
+	meshes[2].GetTransform()->SetPosition(XMFLOAT3(0.3f, 0.5f, 0.0f));
+	meshes[3].GetTransform()->SetPosition(XMFLOAT3(0.6f, -0.5f, 0.0f));
 }
 
 
@@ -273,7 +282,16 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	ImGuiRefresh(deltaTime);
-	
+
+	// Update transformations of objects
+	{	
+		meshes[0].GetTransform()->Rotate(0.0f, 0.0f, 6.0f * deltaTime);
+		meshes[1].GetTransform()->MoveAbsolute(0.0f, 0.4f * deltaTime, 0.0f);
+		meshes[2].GetTransform()->MoveAbsolute(-0.1f * deltaTime, 0.0f, 0.0f);
+		meshes[3].GetTransform()->Rotate(0.0f, 0.0f, -2.0f * deltaTime);
+		meshes[4].GetTransform()->Scale(1.0001f, 1.0001f, 0.0f);
+	}
+
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
@@ -295,17 +313,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// Send new data to Constant Buffer
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	Graphics::Context->Map(constBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	memcpy(mappedBuffer.pData, &constBufferStruct, sizeof(constBufferStruct));
-	Graphics::Context->Unmap(constBuffer.Get(), 0);
-
 	// Draw Meshes
 	{
-		triangle->Draw();
-		box->Draw();
-		crown->Draw();
+		for (int i = 0; i < meshes.size(); i++) {
+			meshes[i].Draw(constBuffer, constBufferStruct);
+		}
 	}
 
 	// Draw ImGui
@@ -412,33 +424,58 @@ void Game::BuildUI() {
 
 	// Mesh Data
 	if (ImGui::CollapsingHeader("Meshes", 1)) {
+		std::vector<ImGuiID> meshIds;
+
 		for (int i = 0; i < std::size(meshes); i++) {
-			if (ImGui::TreeNode(meshes[i]->GetName())) {
-				ImGui::Text("Triangles: %i", meshes[i]->GetIndexCount() / 3);
-				ImGui::Text("Vertices: %i", meshes[i]->GetVertexCount());
-				ImGui::Text("Indices: %i", meshes[i]->GetIndexCount());
+			std::shared_ptr<Mesh> object = meshes.at(i).GetMesh();
+
+			// Ensure that ID is not the same between objects
+			ImGui::PushID(i);
+			if (ImGui::TreeNode(object->GetName())) {
+				ImGui::Text("Triangles: %i", object->GetIndexCount() / 3);
+				ImGui::Text("Vertices: %i", object->GetVertexCount());
+				ImGui::Text("Indices: %i", object->GetIndexCount());
 				ImGui::TreePop();
 				ImGui::NewLine();	// Separation buffer
 			}
+			ImGui::PopID();
 		}
 	}
 
-	// Constant Buffer Data
-	if (ImGui::CollapsingHeader("Consant Buffer", 1)) {
+	// GameEntity Data
+	if (ImGui::CollapsingHeader("GameEntities", 1)) {
+		std::vector<ImGuiID> meshIds;
 
-		// Color Tint
-		if (ImGui::TreeNode("Color Tint")) {
-			ImGui::ColorEdit4("", (float*)&constBufferStruct.colorTint);	//Color Picker
+		for (int i = 0; i < std::size(meshes); i++) {
+			std::shared_ptr<Mesh> object = meshes.at(i).GetMesh();
+			std::shared_ptr<Transform> transform = meshes.at(i).GetTransform();
 
-			ImGui::TreePop();
+			// Get current buffer data of mesh
+			XMFLOAT3 position = transform->GetPosition();
+			XMFLOAT3 rotation = transform->GetRotation();
+			XMFLOAT3 scale = transform->GetScale();
+
+			// Ensure that ID is not the same between objects
+			ImGui::PushID(i);
+			if (ImGui::TreeNode(object->GetName())) {
+				ImGui::SliderFloat3("Position", (float*) &position, -1.0f, 1.0f);
+				ImGui::SliderFloat3("Rotation (Radians)", (float*) &rotation, -1.0f, 1.0f);
+				ImGui::SliderFloat3("Scale", (float*) &scale, 0.0f, 2.0f);
+				ImGui::Text("Mesh Index Count: %i", object->GetIndexCount());
+				ImGui::TreePop();
+			}
+
+			// Set new data
+			transform->SetPosition(position);
+			transform->SetRotation(rotation);
+			transform->SetScale(scale);
+
+			ImGui::PopID();
 		}
 
-		// Offset
-		if (ImGui::TreeNode("Offset")) {
-			ImGui::SliderFloat3("", &constBufferStruct.offset.x, -1.0f, 1.0f);
-
-			ImGui::TreePop();
-		}
+		// Extra Buffer Data
+		ImGui::ColorEdit4("Tint", (float*)&constBufferStruct.colorTint);	//Color Picker
+		// Removed offset since that has been deleted during assignment 5
 	}
 
 	ImGui::NewLine();	// Separation buffer

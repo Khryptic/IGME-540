@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include <vector>
 #include "BufferStructs.h"
+#include "GameEntity.h"
 
 class Game
 {
@@ -51,7 +52,7 @@ private:
 	std::shared_ptr<Mesh> crown;
 
 	// Vector to hold pointers
-	std::shared_ptr<Mesh> meshes[3];
+	std::vector<GameEntity> meshes;
 
 	// Const Buffer and Data Struct
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
