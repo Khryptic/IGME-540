@@ -20,7 +20,6 @@ public:
 	Mesh(const char* name, unsigned int vertexCount, unsigned int indexCount,
 		struct Vertex vertices[], unsigned int indices[]);	// Constructor
 	~Mesh();								// Destructor
-	Mesh(const Mesh&) = delete;				// Remove copy constructor
 	Mesh& operator=(const Mesh&) = delete;	// Remove copy-assignment operator
 
 
