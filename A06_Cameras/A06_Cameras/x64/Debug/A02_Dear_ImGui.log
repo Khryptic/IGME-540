@@ -1,0 +1,21 @@
+﻿  compilation object save succeeded; see E:\School\IGME-540\A06_Cameras\x64\Debug\PixelShader.cso
+  compilation object save succeeded; see E:\School\IGME-540\A06_Cameras\x64\Debug\VertexShader.cso
+  Game.cpp
+  GameEntity.cpp
+  Graphics.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx11.cpp
+  imgui_impl_win32.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  Input.cpp
+  Main.cpp
+  Mesh.cpp
+  PathHelpers.cpp
+  Transform.cpp
+  Window.cpp
+  Generating Code...
+     Creating library E:\School\IGME-540\A06_Cameras\x64\Debug\A06_Cameras.lib and object E:\School\IGME-540\A06_Cameras\x64\Debug\A06_Cameras.exp
+  A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A06_Cameras\x64\Debug\A06_Cameras.exe
