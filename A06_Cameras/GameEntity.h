@@ -21,7 +21,7 @@ public:
 	std::shared_ptr<Transform> GetTransform() { return transform; }
 
 	// Methods
-	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer, BufferStructs constBufferStruct);
+	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer, BufferStructs constBufferStruct, std::shared_ptr<Camera> camera);
 
 private:
 	// Entity Data

@@ -7,6 +7,7 @@
 #include <vector>
 #include "BufferStructs.h"
 #include "Transform.h"
+#include "Camera.h"
 
 #include <DirectXMath.h>
 
@@ -31,6 +32,14 @@ namespace {
 	int selectedStarter = -1; // Index of chosen name
 	ImVec4 windowColor(1.0f, 0.0f, 0.0f, 1.0f); // Color Vector
 	bool stopConfirmation = 0;
+
+	// Cameras
+	std::shared_ptr<Camera> activeCamera;
+	int cameraChoice = 0;
+	const char* cameraNames[] = { "Default", "Side", "Top" };
+	std::vector<std::shared_ptr<Camera>> cameras = { std::make_shared<Camera>(Camera({0.0f, 0.0f, -2.0f}, Window::AspectRatio(), 45.0f)), 
+													 std::make_shared<Camera>(Camera({-1.0f, 0.0f, -1.0f}, Window::AspectRatio(), 60.0f)), 
+													 std::make_shared<Camera>(Camera({3.0f, 2.0f, -2.0f}, Window::AspectRatio(), 90.0f)) };
 }
 
 // --------------------------------------------------------
@@ -47,6 +56,9 @@ void Game::Initialize()
 
 	// Dark Color Style
 	ImGui::StyleColorsDark();
+
+	// Initialize Active Camera
+	activeCamera = cameras.at(0);
 
 	// Set Constant Buffer values
 	constBufferStruct.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
@@ -273,6 +285,11 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
+	for (int i = 0; i < cameras.size(); i++) {
+		if (cameras[i] != nullptr_t()) {
+			cameras[i]->UpdateProjectionMatrix(Window::AspectRatio());
+		}
+	}
 }
 
 
@@ -282,6 +299,9 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	ImGuiRefresh(deltaTime);
+
+	// Update Camera
+	activeCamera->Update(deltaTime);
 
 	// Update transformations of objects
 	{	
@@ -316,7 +336,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Draw Meshes
 	{
 		for (int i = 0; i < meshes.size(); i++) {
-			meshes[i].Draw(constBuffer, constBufferStruct);
+			meshes[i].Draw(constBuffer, constBufferStruct, activeCamera);
 		}
 	}
 
@@ -386,6 +406,48 @@ void Game::BuildUI() {
 		// Replace each %d with the next parameter, and format as decimal integers
 		// The "x" will be printed as-is between the numbers, like so: 800x600
 		ImGui::Text("Window Resolution: %dx%d", Window::Width(), Window::Height());
+	}
+
+	// Camera
+	if (ImGui::CollapsingHeader("Camera", 1)) {
+		// Brings up list of Gen 1 starters
+		if (ImGui::Button("Choose Camera")) {
+			ImGui::OpenPopup("Cameras");
+		}
+
+		ImGui::SameLine();
+		ImGui::TextUnformatted(cameraNames[cameraChoice]); // Camera selection display
+
+		// Create popup menu
+		if (ImGui::BeginPopup("Cameras")) {
+			ImGui::SeparatorText("Cameras");
+			for (int i = 0; i < cameras.size(); i++) {
+				if (ImGui::Selectable(cameraNames[i])) {
+					activeCamera = cameras.at(i);
+					cameraChoice = i;
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+
+		// Camera Attributes
+		// Position
+		ImGui::Text("Position");
+		ImGui::Text("x: %f  y: %f  z: %f", activeCamera->GetPosition().x, 
+										   activeCamera->GetPosition().y, 
+										   activeCamera->GetPosition().z);
+		
+		// Rotation
+		ImGui::NewLine();
+		ImGui::Text("Rotation");
+		ImGui::Text("Pitch: %f  Yaw: %f  Roll: %f", activeCamera->GetRotation().x,
+													activeCamera->GetRotation().y,
+													activeCamera->GetRotation().z);
+
+		// FOV
+		ImGui::NewLine();
+		ImGui::Text("Field of View: %i degrees", (int)activeCamera->GetFOV());
 	}
 
 	// Color Picker Menu

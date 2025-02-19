@@ -5,29 +5,29 @@
 
 class Camera {
 public:
-	// Constructor
-	Camera(DirectX::XMFLOAT3 initialPos, float aspectRatio) {
-		// Initialize Values
-		fovRad = DirectX::XMConvertToRadians(45.0f);
-		nearPlane = 0.1f;
-		farPlane = 1.0f;
-		moveSpeed = 0.5f;
-		mouseSpeed = 0.3f;
-		currectProjection = Projection::perpective;
-
-		// Initialize Matrices
-		DirectX::XMStoreFloat4x4(&viewMatrix, DirectX::XMMatrixIdentity());
-		DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixIdentity());
-
-		UpdateViewMatrix();
-		UpdateProjectionMatrix(aspectRatio);
-	}
-
 	// Enum for camera projection
 	enum Projection {
 		perpective = 0,
 		orthograpic = 1
 	};
+
+	// Constructor
+	Camera(DirectX::XMFLOAT3 initialPos, float aspectRatio, float fovDeg) {
+		// Initialize 
+		fovRad = DirectX::XMConvertToRadians(fovDeg);
+		nearPlane = 0.1f;
+		farPlane = 1000.0f;
+		moveSpeed = 6.0f;
+		mouseSpeed = 0.003f;
+		currectProjection = Projection::perpective;
+
+		// Initialize Position
+		transform.SetPosition(initialPos);
+
+		// Initialize Matrices
+		UpdateViewMatrix();
+		UpdateProjectionMatrix(aspectRatio);
+	}
 
 	// Getters
 	DirectX::XMFLOAT4X4 GetViewMatrix() const {
@@ -38,13 +38,50 @@ public:
 		return projectionMatrix;
 	}
 
+	float GetFOV() const {
+		return DirectX::XMConvertToDegrees(fovRad);
+	}
+
+	float GetNearPlane() const {
+		return nearPlane;
+	}
+
+	float GetFarPlane() const {
+		return farPlane;
+	}
+
+	float GetMovementSpeed() const{
+		return moveSpeed;
+	}
+
+	float GetCameraSpeed() const {
+		return mouseSpeed;
+	}
+
+	Camera::Projection GetProjectionType() const {
+		return currectProjection;
+	}
+
+	DirectX::XMFLOAT3 GetPosition() const {
+		return transform.GetPosition();
+	}
+
+	DirectX::XMFLOAT3 GetRotation() const {
+		return transform.GetRotation();
+	}
+
+	DirectX::XMFLOAT3 GetScale() const {
+		return transform.GetScale();
+	}
+
 	// Functions
 	void UpdateViewMatrix();
 	void UpdateProjectionMatrix(float aspectRatio);
+	void Update(float deltaTime);
 
 private:
 	// Camera requirements
-	Transform transform;
+	Transform transform = Transform();
 	DirectX::XMFLOAT4X4 viewMatrix;
 	DirectX::XMFLOAT4X4 projectionMatrix;
 
