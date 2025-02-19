@@ -156,6 +156,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameEntity.cpp" />
     <ClCompile Include="Graphics.cpp" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BufferStructs.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameEntity.h" />
     <ClInclude Include="Graphics.h" />

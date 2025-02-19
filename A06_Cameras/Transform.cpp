@@ -15,6 +15,24 @@ void Transform::MoveAbsolute(DirectX::XMFLOAT3 offset) {
 	position.z += offset.z;
 }
 
+// Moves the position relative to camera with floats
+void Transform::MoveRelative(float x, float y, float z) {
+	// Using the absolute direction, rotate the transform
+	DirectX::XMVECTOR absDirection = DirectX::XMVector3Rotate(GetPositionVector(x, y, z), GetRotationVector());
+	position.x += DirectX::XMVectorGetX(absDirection);
+	position.y += DirectX::XMVectorGetY(absDirection);
+	position.z += DirectX::XMVectorGetZ(absDirection);
+}
+
+// Moves the position relative to the camera with a float3
+void Transform::MoveRelative(DirectX::XMFLOAT3 offset) {
+	// Using the absolute direction, rotate the transform
+	DirectX::XMVECTOR absDirection = DirectX::XMVector3Rotate(GetPositionVector(offset.x, offset.y, offset.z), GetRotationVector());
+	position.x += DirectX::XMVectorGetX(absDirection);
+	position.y += DirectX::XMVectorGetY(absDirection);
+	position.z += DirectX::XMVectorGetZ(absDirection);
+}
+
 // Rotates based on pitch, yaw, roll values
 void Transform::Rotate(float pitch, float yaw, float roll) {
 	rotation.x += pitch;

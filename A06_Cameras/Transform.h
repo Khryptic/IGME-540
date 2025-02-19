@@ -5,7 +5,7 @@
 class Transform
 {
 public:
-	//Conmstructor
+	//Constructor
 	Transform() {
 		// Set Default Values
 		position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -68,9 +68,34 @@ public:
 		return worldInverseTranspose;
 	}
 
+	DirectX::XMVECTOR GetPositionVector(float x, float y, float z) const {
+		return { x, y , z };
+	}
+
+	DirectX::XMVECTOR GetRotationVector() const {
+		return DirectX::XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+	}
+
+	DirectX::XMFLOAT3 GetRight() {
+		DirectX::XMVECTOR rotatedRight = DirectX::XMVector3Rotate({ 1, 0, 0 }, GetRotationVector());
+		return { DirectX::XMVectorGetX(rotatedRight), DirectX::XMVectorGetY(rotatedRight), DirectX::XMVectorGetZ(rotatedRight) };
+	}
+
+	DirectX::XMFLOAT3 GetUp() {
+		DirectX::XMVECTOR rotatedUp = DirectX::XMVector3Rotate({ 0, 1, 0 }, GetRotationVector());
+		return { DirectX::XMVectorGetX(rotatedUp), DirectX::XMVectorGetY(rotatedUp), DirectX::XMVectorGetZ(rotatedUp) };
+	}																			   
+
+	DirectX::XMFLOAT3 GetForward() {
+		DirectX::XMVECTOR rotatedForward = DirectX::XMVector3Rotate({ 0, 0, 1 }, GetRotationVector());
+		return { DirectX::XMVectorGetX(rotatedForward), DirectX::XMVectorGetY(rotatedForward), DirectX::XMVectorGetZ(rotatedForward) };
+	}
+
 	// Transformer Methods
 	void MoveAbsolute(float x, float y, float z);
 	void MoveAbsolute(DirectX::XMFLOAT3 offset);
+	void MoveRelative(float x, float y, float z);
+	void MoveRelative(DirectX::XMFLOAT3 offset);
 	void Rotate(float pitch, float yaw, float roll);
 	void Rotate(DirectX::XMFLOAT3 rotation);
 	void Scale(float x, float y, float z);
