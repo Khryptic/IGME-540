@@ -122,6 +122,14 @@ void Game::CreateGeometry()
 	Material blueMaterial = Material(blue,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()));
+
+	models.push_back(GameEntity(Mesh("Sphere", FixPath("../../Assets/Models/helix.obj").c_str()), redMaterial));
+	models.push_back(GameEntity(Mesh("Cylinder", FixPath("../../Assets/Models/cube.obj").c_str()), blueMaterial));
+	models.push_back(GameEntity(Mesh("Torus", FixPath("../../Assets/Models/torus.obj").c_str()), greenMaterial));
+
+	// Move Models
+	models[0].GetTransform()->SetPosition(XMFLOAT3(-2.5, 0.0, 0.0));
+	models[1].GetTransform()->SetPosition(XMFLOAT3(2.5, 0.0, 0.0));
 }
 
 
@@ -322,7 +330,7 @@ void Game::BuildUI() {
 	}
 
 	// Mesh Data
-	if (ImGui::CollapsingHeader("Meshes", 1)) {
+	if (ImGui::CollapsingHeader("Models", 1)) {
 		std::vector<ImGuiID> meshIds;
 
 		for (int i = 0; i < std::size(models); i++) {

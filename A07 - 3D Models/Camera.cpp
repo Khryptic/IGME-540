@@ -56,22 +56,13 @@ void Camera::Update(float deltaTime) {
 
 		transform.Rotate((float)cursorMovementY, (float)cursorMovementX, 0.0f);
 
-		// Clamping X rotation
+		// Clamping X rotation so it does not invert
 		if (transform.GetRotation().x >= DirectX::g_XMHalfPi[0] ) {
 			transform.SetRotation(DirectX::g_XMHalfPi[0] - FLT_EPSILON, 0, 0 );
 		}
 
 		else if (transform.GetRotation().x <= -DirectX::g_XMHalfPi[0]) {
 			transform.SetRotation(-DirectX::g_XMHalfPi[0] + FLT_EPSILON, 0, 0);
-		}
-
-		// Clamping Y rotation
-		if (transform.GetRotation().y >= DirectX::g_XMHalfPi[0]) {
-			transform.SetRotation(0, DirectX::g_XMHalfPi[0] - FLT_EPSILON, 0);
-		}
-
-		else if (transform.GetRotation().y <= -DirectX::g_XMHalfPi[0]) {
-			transform.SetRotation(0, -DirectX::g_XMHalfPi[0] + FLT_EPSILON, 0);
 		}
 	}
 

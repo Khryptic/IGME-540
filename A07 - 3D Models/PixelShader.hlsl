@@ -12,7 +12,14 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
 	float4 screenPosition	: SV_POSITION;
-	float4 color			: COLOR;
+	float2 uv				: TEXCOORD;
+	float3 normal			: NORMAL;
+};
+
+// New constant buffer data for use with SimpleShaders
+cbuffer ExternalData : register(b0)
+{
+    float4 colorTint : Color;
 };
 
 // --------------------------------------------------------
@@ -26,9 +33,9 @@ struct VertexToPixel
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	// Just return the input color
-	// - This color (like most values passing through the rasterizer) is 
-	//   interpolated for each pixel between the corresponding vertices 
-	//   of the triangle we're rendering
-	return input.color;
+    // Return the input with the colorTint from the constant buffer
+	// Pass the color through 
+	// - The values will be interpolated per-pixel by the rasterizer
+	
+    return colorTint;
 }
