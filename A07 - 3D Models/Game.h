@@ -24,6 +24,7 @@ public:
 	// Helper Function
 	void ImGuiRefresh(float deltaTime);
 	void BuildUI();
+	void AddObjects(Material material, float offset);
 
 private:
 
@@ -40,6 +41,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
 	// Vector to hold pointers to objects
-	std::vector<GameEntity> models;
+	std::shared_ptr<std::vector<GameEntity>> models = std::make_shared<std::vector<GameEntity>>();
 };
 

@@ -111,25 +111,33 @@ void Game::CreateGeometry()
 	// Set the active vertex and pixel shaders via Materials
 		//  - Once you start applying different shaders to different objects,
 		//    these calls will need to happen multiple times per frame
-	Material redMaterial = Material(red,
+	Material redTint = Material(red,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()));
 
-	Material greenMaterial = Material(green,
+	Material uvMaterial = Material(yellow,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
-		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()));
+		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"UVPixelShader.cso").c_str()));
 
-	Material blueMaterial = Material(blue,
+	Material normalMaterial = Material(purple,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
-		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()));
+		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"NormalPixelShader.cso").c_str()));
+	
+	Material fancyMaterial = Material(white,
+		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
+		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"FancyPixelShader.cso").c_str()));
 
-	models.push_back(GameEntity(Mesh("Sphere", FixPath("../../Assets/Models/helix.obj").c_str()), redMaterial));
-	models.push_back(GameEntity(Mesh("Cylinder", FixPath("../../Assets/Models/cube.obj").c_str()), blueMaterial));
-	models.push_back(GameEntity(Mesh("Torus", FixPath("../../Assets/Models/torus.obj").c_str()), greenMaterial));
+	// Top Row with Color Tint
+	AddObjects(redTint, 4.5);
 
-	// Move Models
-	models[0].GetTransform()->SetPosition(XMFLOAT3(-2.5, 0.0, 0.0));
-	models[1].GetTransform()->SetPosition(XMFLOAT3(2.5, 0.0, 0.0));
+	// Middle Row with UV Colors
+	AddObjects(uvMaterial, 1.5);
+
+	// Second Middle Row with Normal Colors
+	AddObjects(normalMaterial, -1.5);
+
+	// Bottom Row with Fancy Shader
+	AddObjects(fancyMaterial, -4.5);
 }
 
 
@@ -180,8 +188,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Draw Meshes
 	{
-		for (int i = 0; i < models.size(); i++) {
-			models[i].Draw(activeCamera);
+		for (int i = 0; i < models->size(); i++) {
+			models->at(i).Draw(activeCamera);
 		}
 	}
 
@@ -333,8 +341,8 @@ void Game::BuildUI() {
 	if (ImGui::CollapsingHeader("Models", 1)) {
 		std::vector<ImGuiID> meshIds;
 
-		for (int i = 0; i < std::size(models); i++) {
-			std::shared_ptr<Mesh> object = models.at(i).GetMesh();
+		for (int i = 0; i < models->size(); i++) {
+			std::shared_ptr<Mesh> object = models->at(i).GetMesh();
 
 			// Ensure that ID is not the same between objects
 			ImGui::PushID(i);
@@ -353,9 +361,9 @@ void Game::BuildUI() {
 	if (ImGui::CollapsingHeader("GameEntities", 1)) {
 		std::vector<ImGuiID> meshIds;
 
-		for (int i = 0; i < std::size(models); i++) {
-			std::shared_ptr<Mesh> object = models.at(i).GetMesh();
-			std::shared_ptr<Transform> transform = models.at(i).GetTransform();
+		for (int i = 0; i < models->size(); i++) {
+			std::shared_ptr<Mesh> object = models->at(i).GetMesh();
+			std::shared_ptr<Transform> transform = models->at(i).GetTransform();
 
 			// Get current buffer data of mesh
 			XMFLOAT3 position = transform->GetPosition();
@@ -365,9 +373,9 @@ void Game::BuildUI() {
 			// Ensure that ID is not the same between objects
 			ImGui::PushID(i);
 			if (ImGui::TreeNode(object->GetName())) {
-				ImGui::SliderFloat3("Position", (float*) &position, -1.0f, 1.0f);
-				ImGui::SliderFloat3("Rotation (Radians)", (float*) &rotation, -1.0f, 1.0f);
-				ImGui::SliderFloat3("Scale", (float*) &scale, 0.0f, 2.0f);
+				ImGui::SliderFloat3("Position", (float*) &position, -10.0f, 10.0f);
+				ImGui::SliderFloat3("Rotation (Radians)", (float*) &rotation, -10.0f, 10.0f);
+				ImGui::SliderFloat3("Scale", (float*) &scale, 0.0f, 3.0f);
 				ImGui::Text("Mesh Index Count: %i", object->GetIndexCount());
 				ImGui::TreePop();
 			}
@@ -431,4 +439,26 @@ void Game::BuildUI() {
 
 	//End current window
 	ImGui::End();
+}
+
+// Create Row of Objects
+void Game::AddObjects(Material material, float offset) {
+	int modelsLength = (int) models->size();
+
+	models->push_back(GameEntity(Mesh("Cube", FixPath("../../Assets/Models/cube.obj").c_str()), material));
+	models->push_back(GameEntity(Mesh("Cylinder", FixPath("../../Assets/Models/cylinder.obj").c_str()), material));
+	models->push_back(GameEntity(Mesh("Helix", FixPath("../../Assets/Models/helix.obj").c_str()), material));
+	models->push_back(GameEntity(Mesh("Quad", FixPath("../../Assets/Models/quad.obj").c_str()), material));
+	models->push_back(GameEntity(Mesh("Double-Sided Quad", FixPath("../../Assets/Models/quad_double_sided.obj").c_str()), material));
+	models->push_back(GameEntity(Mesh("Sphere", FixPath("../../Assets/Models/sphere.obj").c_str()), material));
+	models->push_back(GameEntity(Mesh("Torus", FixPath("../../Assets/Models/torus.obj").c_str()), material));
+
+	// Move Models
+	models->at(modelsLength).GetTransform()->SetPosition(XMFLOAT3(-2.5, offset, 0.0)); 
+	models->at(modelsLength + 1).GetTransform()->SetPosition(XMFLOAT3(2.5, offset, 0.0));
+	models->at(modelsLength + 2).GetTransform()->SetPosition(XMFLOAT3(0.0, offset, 0.0));
+	models->at(modelsLength + 3).GetTransform()->SetPosition(XMFLOAT3(7.5, offset, 0.0));
+	models->at(modelsLength + 4).GetTransform()->SetPosition(XMFLOAT3(-7.5, offset, 0.0));
+	models->at(modelsLength + 5).GetTransform()->SetPosition(XMFLOAT3(5.0, offset, 0.0));
+	models->at(modelsLength + 6).GetTransform()->SetPosition(XMFLOAT3(-5.0, offset, 0.0));
 }

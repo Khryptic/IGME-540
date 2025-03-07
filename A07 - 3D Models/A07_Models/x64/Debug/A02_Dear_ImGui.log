@@ -1,4 +1,4 @@
-﻿  compilation object save succeeded; see E:\School\IGME-540\A07 - 3D Models\x64\Debug\PixelShader.cso
-  compilation object save succeeded; see E:\School\IGME-540\A07 - 3D Models\x64\Debug\VertexShader.cso
-  Scanning sources for module dependencies...
+﻿  Scanning sources for module dependencies...
+  Game.cpp
+     Creating library E:\School\IGME-540\A07 - 3D Models\x64\Debug\A07_Models.lib and object E:\School\IGME-540\A07 - 3D Models\x64\Debug\A07_Models.exp
   A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A07 - 3D Models\x64\Debug\A07_Models.exe
