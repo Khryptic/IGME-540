@@ -39,14 +39,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
-	// Shaders and shader-related constructs
-
-	// Shared Pointers
-	std::shared_ptr<Mesh> triangle;
-	std::shared_ptr<Mesh> box;
-	std::shared_ptr<Mesh> crown;
-
-	// Vector to hold pointers
-	std::vector<GameEntity> meshes;
+	// Vector to hold pointers to objects
+	std::vector<GameEntity> models;
 };
 

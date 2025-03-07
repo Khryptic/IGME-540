@@ -75,12 +75,6 @@ void Game::Initialize()
 		// geometric primitives (points, lines or triangles) we want to draw.  
 		// Essentially: "What kind of shape should the GPU draw with our vertices?"
 		Graphics::Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// Ensure the pipeline knows how to interpret all the numbers stored in
-		// the vertex buffer. For this course, all of your vertices will probably
-		// have the same layout, so we can just set this once at startup.
-		// Graphics::Context->IASetInputLayout(inputLayout.Get());
-
 	}
 }
 
@@ -128,70 +122,6 @@ void Game::CreateGeometry()
 	Material blueMaterial = Material(blue,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()));
-
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in CPU memory
-	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
-	Vertex verticesTri[] =
-	{
-		{ XMFLOAT3(+0.0f, +0.1f, +0.0f), red },
-		{ XMFLOAT3(+0.1f, -0.1f, +0.0f), green },
-		{ XMFLOAT3(-0.1f, -0.1f, +0.0f), yellow },
-	};
-
-	Vertex verticesBox[] =
-	{
-		{ XMFLOAT3(-0.2f, +0.2f, +0.0f), black },
-		{ XMFLOAT3(-0.2f, -0.2f, +0.0f), blue },
-		{ XMFLOAT3(+0.2f, +0.2f, +0.0f), white },
-		{ XMFLOAT3(+0.2f, -0.2f, +0.0f), red },
-	};
-
-	Vertex verticesCrown[] =
-	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
-		{ XMFLOAT3(+0.5f, +0.5f, +0.0f), yellow },
-		{ XMFLOAT3(-0.5f, +0.5f, +0.0f), purple },
-	};
-
-	// Set up indices, which tell us which vertices to use and in which order
-	// - This is redundant for just 3 vertices, but will be more useful later
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
-	unsigned int indicesTri[] = { 0, 1, 2 };
-	unsigned int indicesBox[] = { 0, 2, 1, 3, 1, 2};
-	unsigned int indicesCrown[] = { 0, 1, 2, 3, 1, 2, 4, 1, 2};
-
-	triangle = std::make_shared<Mesh>("Triangle", (unsigned int)std::size(verticesTri), (unsigned int)std::size(indicesTri),
-		verticesTri, indicesTri);
-	box = std::make_shared<Mesh>("Box", (unsigned int)std::size(verticesBox), (unsigned int)std::size(indicesBox),
-		verticesBox, indicesBox);
-	crown = std::make_shared<Mesh>("Crown", (unsigned int)std::size(verticesCrown), (unsigned int)std::size(indicesCrown),
-		verticesCrown, indicesCrown);
-
-	meshes.push_back(GameEntity(*triangle, redMaterial));
-	meshes.push_back(GameEntity(*triangle, greenMaterial));
-	meshes.push_back(GameEntity(*box, blueMaterial));
-	meshes.push_back(GameEntity(*box,blueMaterial));
-	meshes.push_back(GameEntity(*crown, redMaterial));
-
-	// Move some meshes
-	meshes[0].GetTransform()->SetPosition(XMFLOAT3(-0.3f, 0.5f, 0.0f));
-	meshes[1].GetTransform()->SetPosition(XMFLOAT3(-0.8f, -0.8f, 0.0f));
-	meshes[2].GetTransform()->SetPosition(XMFLOAT3(0.3f, 0.5f, 0.0f));
-	meshes[3].GetTransform()->SetPosition(XMFLOAT3(0.6f, -0.5f, 0.0f));
 }
 
 
@@ -219,15 +149,6 @@ void Game::Update(float deltaTime, float totalTime)
 	// Update Camera
 	activeCamera->Update(deltaTime);
 
-	// Update transformations of objects
-	{	
-		meshes[0].GetTransform()->Rotate(0.0f, 0.0f, 6.0f * deltaTime);
-		meshes[1].GetTransform()->MoveAbsolute(0.0f, 0.4f * deltaTime, 0.0f);
-		meshes[2].GetTransform()->MoveAbsolute(-0.1f * deltaTime, 0.0f, 0.0f);
-		meshes[3].GetTransform()->Rotate(0.0f, 0.0f, -2.0f * deltaTime);
-		meshes[4].GetTransform()->Scale(1.0001f, 1.0001f, 0.0f);
-	}
-
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
@@ -251,8 +172,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Draw Meshes
 	{
-		for (int i = 0; i < meshes.size(); i++) {
-			meshes[i].Draw(activeCamera);
+		for (int i = 0; i < models.size(); i++) {
+			models[i].Draw(activeCamera);
 		}
 	}
 
@@ -404,8 +325,8 @@ void Game::BuildUI() {
 	if (ImGui::CollapsingHeader("Meshes", 1)) {
 		std::vector<ImGuiID> meshIds;
 
-		for (int i = 0; i < std::size(meshes); i++) {
-			std::shared_ptr<Mesh> object = meshes.at(i).GetMesh();
+		for (int i = 0; i < std::size(models); i++) {
+			std::shared_ptr<Mesh> object = models.at(i).GetMesh();
 
 			// Ensure that ID is not the same between objects
 			ImGui::PushID(i);
@@ -424,9 +345,9 @@ void Game::BuildUI() {
 	if (ImGui::CollapsingHeader("GameEntities", 1)) {
 		std::vector<ImGuiID> meshIds;
 
-		for (int i = 0; i < std::size(meshes); i++) {
-			std::shared_ptr<Mesh> object = meshes.at(i).GetMesh();
-			std::shared_ptr<Transform> transform = meshes.at(i).GetTransform();
+		for (int i = 0; i < std::size(models); i++) {
+			std::shared_ptr<Mesh> object = models.at(i).GetMesh();
+			std::shared_ptr<Transform> transform = models.at(i).GetTransform();
 
 			// Get current buffer data of mesh
 			XMFLOAT3 position = transform->GetPosition();
