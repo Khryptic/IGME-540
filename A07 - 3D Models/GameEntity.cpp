@@ -2,22 +2,23 @@
 #include "Graphics.h"
 
 // Draw Entity
-void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer, BufferStructs constBufferStruct, 
-	std::shared_ptr<Camera> camera) {
-	// Bind Constant Buffer to Pipeline
-	Graphics::Context->VSSetConstantBuffers(0, 1, constBuffer.GetAddressOf());
+void GameEntity::Draw(std::shared_ptr<Camera> camera) {
 
-	// Get World Matrix
+	// Fill Vertex Shader
+	std::shared_ptr<SimpleVertexShader> vertexShader = material->getVS();
 	transform->CreateWorldMatrix();
-	constBufferStruct.world = transform->GetWorldMatrix();
-	constBufferStruct.view = camera->GetViewMatrix();
-	constBufferStruct.projection = camera->GetProjectionMatrix();
 
-	// Send new data to Constant Buffer
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	Graphics::Context->Map(constBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	memcpy(mappedBuffer.pData, &constBufferStruct, sizeof(constBufferStruct));
-	Graphics::Context->Unmap(constBuffer.Get(), 0);
+	vertexShader->SetFloat4("colorTint", material->getTint());
+	vertexShader->SetMatrix4x4("world", transform->GetWorldMatrix());
+	vertexShader->SetMatrix4x4("view", camera->GetViewMatrix());
+	vertexShader->SetMatrix4x4("projection", camera->GetProjectionMatrix());
+
+	// Copy Buffer Data
+	vertexShader->CopyAllBufferData();
+
+	// Activate Shaders
+	material->getVS()->SetShader();
+	material->getPS()->SetShader();
 
 	// Draw Mesh
 	mesh->Draw();

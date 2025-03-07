@@ -4,7 +4,6 @@
 #include <memory>
 #include "Mesh.h"
 #include <vector>
-#include "BufferStructs.h"
 #include "GameEntity.h"
 
 class Game
@@ -28,8 +27,7 @@ public:
 
 private:
 
-	// Initialization helper methods - feel free to customize, combine, remove, etc.
-	void LoadShaders();
+	// Initialization helper methods
 	void CreateGeometry();
 
 	// Note the usage of ComPtr below
@@ -42,9 +40,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
 	// Shaders and shader-related constructs
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 
 	// Shared Pointers
 	std::shared_ptr<Mesh> triangle;
@@ -53,9 +48,5 @@ private:
 
 	// Vector to hold pointers
 	std::vector<GameEntity> meshes;
-
-	// Const Buffer and Data Struct
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
-	BufferStructs constBufferStruct;
 };
 

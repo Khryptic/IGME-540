@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "A07_Models\\x64\\Debug\\material.obj",
+            "outputs": [
+                "A07_Models\\x64\\Debug\\material.h_9A9D563A5A8E207F.ifc.dt.module.json",
+                "A07_Models\\x64\\Debug\\material.h_9A9D563A5A8E207F.ifc.dt.d.json",
+                "A07_Models\\x64\\Debug\\material.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "E:\\School\\IGME-540\\A07 - 3D Models\\material.h",
+                    "source-path": "e:\\school\\igme-540\\a07 - 3d models\\material.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}

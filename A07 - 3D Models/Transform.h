@@ -76,17 +76,17 @@ public:
 		return DirectX::XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
 	}
 
-	DirectX::XMFLOAT3 GetRight() {
+	DirectX::XMFLOAT3 GetRight() const {
 		DirectX::XMVECTOR rotatedRight = DirectX::XMVector3Rotate({ 1, 0, 0 }, GetRotationVector());
 		return { DirectX::XMVectorGetX(rotatedRight), DirectX::XMVectorGetY(rotatedRight), DirectX::XMVectorGetZ(rotatedRight) };
 	}
 
-	DirectX::XMFLOAT3 GetUp() {
+	DirectX::XMFLOAT3 GetUp() const {
 		DirectX::XMVECTOR rotatedUp = DirectX::XMVector3Rotate({ 0, 1, 0 }, GetRotationVector());
 		return { DirectX::XMVectorGetX(rotatedUp), DirectX::XMVectorGetY(rotatedUp), DirectX::XMVectorGetZ(rotatedUp) };
 	}																			   
 
-	DirectX::XMFLOAT3 GetForward() {
+	DirectX::XMFLOAT3 GetForward() const {
 		DirectX::XMVECTOR rotatedForward = DirectX::XMVector3Rotate({ 0, 0, 1 }, GetRotationVector());
 		return { DirectX::XMVectorGetX(rotatedForward), DirectX::XMVectorGetY(rotatedForward), DirectX::XMVectorGetZ(rotatedForward) };
 	}
