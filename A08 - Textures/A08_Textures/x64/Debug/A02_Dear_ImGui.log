@@ -1,4 +1,5 @@
 ﻿  Scanning sources for module dependencies...
+<<<<<<< HEAD
   Material.h
   Compiling...
   Material.h
@@ -82,4 +83,11 @@ C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um\DirectXMath.h(284
   Main.cpp
   Material.cpp
   Generating Code...
+=======
+  Game.cpp
+E:\School\IGME-540\A08 - Textures\Material.h(52,26): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Game.cpp')
+  
+     Creating library E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.lib and object E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.exp
+>>>>>>> ca58eb2981051824c896a118426781cd4e3e6f90
   A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.exe
