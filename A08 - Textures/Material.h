@@ -49,7 +49,11 @@ public:
 	}
 
 	int GetTextureCount() const {
+<<<<<<< HEAD
 		return (int) textureSRVs.size();
+=======
+		return (int)textureSRVs.size();
+>>>>>>> 2dd67e75d2a1a323cf1df44cdfc715d12404704f
 	}
 
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> GetTextureSRVs() const {
