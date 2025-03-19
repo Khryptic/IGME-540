@@ -1,0 +1,7 @@
+﻿  Scanning sources for module dependencies...
+  Game.cpp
+E:\School\IGME-540\A08 - Textures\Material.h(52,26): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Game.cpp')
+  
+     Creating library E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.lib and object E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.exp
+  A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.exe

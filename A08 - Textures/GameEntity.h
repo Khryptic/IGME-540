@@ -19,6 +19,7 @@ public:
 	// Getters
 	std::shared_ptr<Mesh> GetMesh() { return mesh; }
 	std::shared_ptr<Transform> GetTransform() { return transform; }
+	std::shared_ptr<Material> GetMaterial() { return material; }
 
 	// Methods
 	void Draw(std::shared_ptr<Camera> camera);

@@ -19,6 +19,9 @@
     <Filter Include="Source Files\ImGui">
       <UniqueIdentifier>{23828512-8db8-4f2f-a4a2-9fda8434bf2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Textures">
+      <UniqueIdentifier>{ff750d8b-aa98-445f-9bdd-c8f01d54711f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="Material.h">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,5 +163,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\Carpet\carpet_color.jpg">
+      <Filter>Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

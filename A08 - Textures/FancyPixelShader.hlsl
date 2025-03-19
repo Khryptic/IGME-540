@@ -1,4 +1,8 @@
 
+// Texture and Sampler Registers
+Texture2D Ice : register(t0); // Registers for Textures
+SamplerState Simple : register(s0); // Registers for Samplers
+
 // Struct representing the data we expect to receive from earlier pipeline stages
 // - Should match the output of our corresponding vertex shader
 // - The name of the struct itself is unimportant
@@ -20,6 +24,8 @@ struct VertexToPixel
 cbuffer ExternalData : register(b0)
 {
     float4 colorTint : COLOR;
+    float2 scale     : TEXCOORD;
+    float2 offset    : TEXCOOD;
 };
 
 // Pseudo-Random Noise Function
@@ -39,8 +45,11 @@ float random(float2 s)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {	    
+    input.uv = input.uv * scale + offset;
+    
     // New Color Based on Noise
     float4 newColor = colorTint * float4(random(input.screenPosition.yz), random(input.screenPosition.xy), random(input.screenPosition.xz), 1);
-    
-    return newColor;
+    float4 IceColor = Ice.Sample(Simple, input.uv);
+	       
+    return IceColor * newColor;
 }
