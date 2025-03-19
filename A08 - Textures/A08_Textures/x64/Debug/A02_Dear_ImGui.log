@@ -82,4 +82,5 @@ C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um\DirectXMath.h(284
   Main.cpp
   Material.cpp
   Generating Code...
+     Creating library E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.lib and object E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.exp
   A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A08 - Textures\x64\Debug\A08_Textures.exe
