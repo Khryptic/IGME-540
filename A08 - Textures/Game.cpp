@@ -10,6 +10,7 @@
 #include "SimpleShader.h"
 #include "Material.h"
 
+#include "WICTextureLoader.h"
 #include <DirectXMath.h>
 
 // Needed for a helper function to load pre-compiled shader files
@@ -26,22 +27,27 @@ using namespace DirectX;
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
 
-// Namespace to store variables
-namespace {
-	bool showDemo = 0;	// Whether or not to show demo window
-	const char* starterNames[] = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" }; // Popup list options
-	int selectedStarter = -1; // Index of chosen name
-	ImVec4 windowColor(1.0f, 0.0f, 0.0f, 1.0f); // Color Vector
-	bool stopConfirmation = 0;
+// Local variables
+bool showDemo = 0;	// Whether or not to show demo window
+const char* starterNames[] = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" }; // Popup list options
+int selectedStarter = -1; // Index of chosen name
+ImVec4 windowColor(1.0f, 0.0f, 0.0f, 1.0f); // Color Vector
+bool stopConfirmation = 0;
 
-	// Cameras
-	std::shared_ptr<Camera> activeCamera;
-	int cameraChoice = 0;
-	const char* cameraNames[] = { "Default", "Side", "Top" };
-	std::vector<std::shared_ptr<Camera>> cameras = { std::make_shared<Camera>(Camera({0.0f, 0.0f, -2.0f}, Window::AspectRatio(), 45.0f)), 
-													 std::make_shared<Camera>(Camera({-1.0f, 0.0f, -1.0f}, Window::AspectRatio(), 60.0f)), 
-													 std::make_shared<Camera>(Camera({3.0f, 2.0f, -2.0f}, Window::AspectRatio(), 90.0f)) };
-}
+// Cameras
+std::shared_ptr<Camera> activeCamera;
+int cameraChoice = 0;
+const char* cameraNames[] = { "Default", "Side", "Top" };
+std::vector<std::shared_ptr<Camera>> cameras = { std::make_shared<Camera>(Camera({0.0f, 0.0f, -2.0f}, Window::AspectRatio(), 45.0f)),
+											 std::make_shared<Camera>(Camera({-1.0f, 0.0f, -1.0f}, Window::AspectRatio(), 60.0f)),
+											 std::make_shared<Camera>(Camera({3.0f, 2.0f, -2.0f}, Window::AspectRatio(), 90.0f)) };
+
+// Textures
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> carpetSRV;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iceSRV;
+Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+D3D11_SAMPLER_DESC samplerDesc;
+std::vector<std::shared_ptr<Material>> materials;
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -54,6 +60,27 @@ void Game::Initialize()
 	ImGui::CreateContext();
 	ImGui_ImplWin32_Init(Window::Handle());
 	ImGui_ImplDX11_Init(Graphics::Device.Get(), Graphics::Context.Get());
+
+	// Load Textures and Sampler State
+	DirectX::CreateWICTextureFromFile(Graphics::Device.Get(), 
+		Graphics::Context.Get(), 
+		L"Assets/Textures/carpet_color.jpg", 
+		nullptr, 
+		&carpetSRV);
+	DirectX::CreateWICTextureFromFile(Graphics::Device.Get(), 
+		Graphics::Context.Get(), 
+		L"Assets/Textures/ice_color.jpg", 
+		nullptr, 
+		&iceSRV);
+
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	Graphics::Device.Get()->CreateSamplerState(&samplerDesc, &samplerState);
 
 	// Dark Color Style
 	ImGui::StyleColorsDark();
@@ -109,11 +136,15 @@ void Game::CreateGeometry()
 	XMFLOAT4 black = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Set the active vertex and pixel shaders via Materials
-		//  - Once you start applying different shaders to different objects,
-		//    these calls will need to happen multiple times per frame
+	//  - Once you start applying different shaders to different objects,
+	//    these calls will need to happen multiple times per frame
 	Material redTint = Material(red,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()));
+	
+	redTint.AddTextureSRV("Carpet", carpetSRV);
+	redTint.AddTextureSRV("Ice", iceSRV);
+	redTint.AddSampler("Simple", samplerState);
 
 	Material uvMaterial = Material(yellow,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
@@ -126,15 +157,22 @@ void Game::CreateGeometry()
 	Material fancyMaterial = Material(white,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"FancyPixelShader.cso").c_str()));
+	fancyMaterial.AddTextureSRV("Ice", iceSRV);
+	fancyMaterial.AddSampler("Simple", samplerState);
+
+	materials.push_back(std::make_shared<Material>(redTint));
+	materials.push_back(std::make_shared<Material>(uvMaterial));
+	materials.push_back(std::make_shared<Material>(normalMaterial));
+	materials.push_back(std::make_shared<Material>(fancyMaterial));
 
 	// Top Row with Color Tint
-	AddObjects(redTint, 4.5);
+	AddObjects(uvMaterial, 4.5);
 
 	// Middle Row with UV Colors
-	AddObjects(uvMaterial, 1.5);
+	AddObjects(normalMaterial, 1.5);
 
 	// Second Middle Row with Normal Colors
-	AddObjects(normalMaterial, -1.5);
+	AddObjects(redTint, -1.5);
 
 	// Bottom Row with Fancy Shader
 	AddObjects(fancyMaterial, -4.5);
@@ -358,32 +396,59 @@ void Game::BuildUI() {
 	}
 
 	// GameEntity Data
-	if (ImGui::CollapsingHeader("GameEntities", 1)) {
+	if (ImGui::CollapsingHeader("Objects", 1)) {
 		std::vector<ImGuiID> meshIds;
 
 		for (int i = 0; i < models->size(); i++) {
 			std::shared_ptr<Mesh> object = models->at(i).GetMesh();
 			std::shared_ptr<Transform> transform = models->at(i).GetTransform();
+			std::shared_ptr<Material> material = models.get()->at(i).GetMaterial();
 
 			// Get current buffer data of mesh
 			XMFLOAT3 position = transform->GetPosition();
 			XMFLOAT3 rotation = transform->GetRotation();
 			XMFLOAT3 scale = transform->GetScale();
 
+			XMFLOAT4 colorTint = material->GetTint();
+			XMFLOAT2 uvScale = { material->GetUVScale().at(0), material->GetUVScale().at(1) };
+			XMFLOAT2 offset = { material->GetUVOffset().at(0), material->GetUVOffset().at(1) };
+
 			// Ensure that ID is not the same between objects
 			ImGui::PushID(i);
 			if (ImGui::TreeNode(object->GetName())) {
-				ImGui::SliderFloat3("Position", (float*) &position, -10.0f, 10.0f);
-				ImGui::SliderFloat3("Rotation (Radians)", (float*) &rotation, -10.0f, 10.0f);
-				ImGui::SliderFloat3("Scale", (float*) &scale, 0.0f, 3.0f);
+				ImGui::Text("Object Data");
+				ImGui::SliderFloat3("Position", (float*)&position, -10.0f, 10.0f);
+				ImGui::SliderFloat3("Rotation (Radians)", (float*)&rotation, -10.0f, 10.0f);
+				ImGui::SliderFloat3("Scale", (float*)&scale, 0.0f, 3.0f);
 				ImGui::Text("Mesh Index Count: %i", object->GetIndexCount());
+
+				// Material Data
+				ImGui::NewLine();
+				ImGui::Text("Material Data");
+				ImGui::ColorEdit4("Window Color Editor", (float*) &colorTint);	//Color Picker
+				ImGui::SliderFloat2("UV Scale", (float*) &uvScale, 1.0f, 10.0f);
+				ImGui::SliderFloat2("UV Offset", (float*) &offset, 1.0f, 10.0f);
+				ImGui::NewLine();
+				ImGui::Text("Texures");
+
+				// Show Textures
+				for (auto& t : material.get()->GetTextureSRVs()) {
+					ImGui::Text(t.first.c_str());
+					ImGui::Image((ImTextureID)t.second.Get(), ImVec2(100, 100));
+				}
+
 				ImGui::TreePop();
 			}
+
 
 			// Set new data
 			transform->SetPosition(position);
 			transform->SetRotation(rotation);
 			transform->SetScale(scale);
+
+			material->SetTint(colorTint);
+			material->SetUVScale({ uvScale.x, uvScale.y });
+			material->SetUVOffset({ offset.x, offset.y });
 
 			ImGui::PopID();
 		}

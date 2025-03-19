@@ -1,4 +1,9 @@
 
+// Texture and Sampler Registers
+Texture2D Carpet : register(t0); // Registers for Textures
+Texture2D Ice : register(t1); // Registers for Textures
+SamplerState Simple : register(s0); // Registers for Samplers
+
 // Struct representing the data we expect to receive from earlier pipeline stages
 // - Should match the output of our corresponding vertex shader
 // - The name of the struct itself is unimportant
@@ -19,7 +24,9 @@ struct VertexToPixel
 // New constant buffer data for use with SimpleShaders
 cbuffer ExternalData : register(b0)
 {
-    float4 colorTint : Color;
+    float4 colorTint	 : COLOR;
+    float2 scale		 : TEXCOORD;
+    float2 offset	     : TEXCOOD;
 };
 
 // --------------------------------------------------------
@@ -36,6 +43,9 @@ float4 main(VertexToPixel input) : SV_TARGET
     // Return the input with the colorTint from the constant buffer
 	// Pass the color through 
 	// - The values will be interpolated per-pixel by the rasterizer
+    input.uv = input.uv * scale + offset;
+    float4 carpetColor = Carpet.Sample(Simple, input.uv);
+    float4 iceColor = Ice.Sample(Simple, input.uv);
 	
-    return colorTint;
+    return abs(carpetColor - iceColor) * colorTint;
 }
