@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "A08_Textures\\x64\\Debug\\Material.obj",
+            "outputs": [
+                "A08_Textures\\x64\\Debug\\Material.h_45F4320FB15DB5AA.ifc.dt.module.json",
+                "A08_Textures\\x64\\Debug\\Material.h_45F4320FB15DB5AA.ifc.dt.d.json",
+                "A08_Textures\\x64\\Debug\\Material.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "E:\\School\\IGME-540\\A09 - Lighting\\Material.h",
+                    "source-path": "e:\\school\\igme-540\\a09 - lighting\\material.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
