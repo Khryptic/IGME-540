@@ -4,7 +4,6 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
-#include "Window.h"
 #include <vector>
 #include "Transform.h"
 #include "Camera.h"
@@ -49,7 +48,7 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iceSRV;
 Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 D3D11_SAMPLER_DESC samplerDesc;
 std::vector<std::shared_ptr<Material>> materials;
-XMFLOAT3 ambientColor = {0.2, 0.2, 0.2};
+XMFLOAT3 ambientColor = {0.1f, 0.1f, 0.25f};
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -89,7 +88,53 @@ void Game::Initialize()
 
 	// Initialize Active Camera
 	activeCamera = cameras.at(0);
-	
+
+	// Initialize Lighting Struct
+	//lightsData = {};
+
+	//Create lights
+	Light light1 = {};
+	light1.Type = LIGHT_TYPE_DIRECTION;
+	light1.Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	light1.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	light1.Intensity = 0.8f;
+
+	Light light2 = {};
+	light2.Type = LIGHT_TYPE_DIRECTION;
+	light2.Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
+	light2.Color = XMFLOAT3(0.4f, 0.9f, 0.7f);
+	light2.Intensity = 0.4f;
+
+	Light light3 = {};
+	light3.Type = LIGHT_TYPE_POINT;
+	light3.Range = 10.0f;
+	light3.Position = XMFLOAT3(0.0f, -3.0f, 0.0f);
+	light3.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	light3.Intensity = 0.9f;
+
+	Light light4 = {};
+	light4.Type = LIGHT_TYPE_DIRECTION;
+	light4.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	light4.Color = XMFLOAT3(0.5f, 0.5f, 0.5f);
+	light4.Intensity = 1.4f;
+
+	Light light5 = {};
+	light5.Type = LIGHT_TYPE_SPOT;
+	light5.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	light5.Position = XMFLOAT3(0.0f, -15.0f, 0.0f);
+	light5.Range = 30.0f;
+	light5.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	light5.SpotInnerAngle = XMConvertToRadians(20.0f);
+	light5.SpotOuterAngle = XMConvertToRadians(21.0f);
+	light5.Intensity = 0.9f;
+
+
+	//lightsData.push_back(light1);
+	//lightsData.push_back(light2);
+	//lightsData.push_back(light3);
+	//lightsData.push_back(light4);
+	lightsData.push_back(light5);
+
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
@@ -129,7 +174,7 @@ void Game::CreateGeometry()
 {
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 red = XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 	XMFLOAT4 yellow = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
@@ -140,48 +185,49 @@ void Game::CreateGeometry()
 	// Set the active vertex and pixel shaders via Materials
 	//  - Once you start applying different shaders to different objects,
 	//    these calls will need to happen multiple times per frame
-	Material redTint = Material(red,
+	Material mainTint = Material(white,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()),
-		0.5);
+		0.5f);
 	
-	redTint.AddTextureSRV("Carpet", carpetSRV);
-	redTint.AddTextureSRV("Ice", iceSRV);
-	redTint.AddSampler("Simple", samplerState);
+	mainTint.AddTextureSRV("Carpet", carpetSRV);
+	mainTint.AddTextureSRV("Ice", iceSRV);
+	mainTint.AddSampler("Simple", samplerState);
 
 	Material uvMaterial = Material(yellow,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"UVPixelShader.cso").c_str()),
-		0.5);
+		0.5f);
 
 	Material normalMaterial = Material(purple,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"NormalPixelShader.cso").c_str()),
-		0.5);
+		1.0f);
 	
 	Material fancyMaterial = Material(white,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"FancyPixelShader.cso").c_str()),
-		0.5);
+		1.0f);
+	fancyMaterial.AddTextureSRV("Carpet", carpetSRV);
 	fancyMaterial.AddTextureSRV("Ice", iceSRV);
 	fancyMaterial.AddSampler("Simple", samplerState);
 
-	materials.push_back(std::make_shared<Material>(redTint));
+	materials.push_back(std::make_shared<Material>(mainTint));
 	materials.push_back(std::make_shared<Material>(uvMaterial));
 	materials.push_back(std::make_shared<Material>(normalMaterial));
 	materials.push_back(std::make_shared<Material>(fancyMaterial));
 
 	// Top Row with Color Tint
-	AddObjects(uvMaterial, 4.5);
+	//AddObjects(uvMaterial, 4.5);
 
 	// Middle Row with UV Colors
-	AddObjects(normalMaterial, 1.5);
+	//AddObjects(normalMaterial, 1.5);
 
 	// Second Middle Row with Normal Colors
-	AddObjects(redTint, -1.5);
+	AddObjects(mainTint, 0);
 
 	// Bottom Row with Fancy Shader
-	AddObjects(fancyMaterial, -4.5);
+	//AddObjects(fancyMaterial, -4.5);
 }
 
 
@@ -233,6 +279,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	{
 		for (int i = 0; i < models->size(); i++) {
 			models->at(i).GetMaterial()->GetPS()->SetFloat3("ambient", ambientColor);
+			models->at(i).GetMaterial()->GetPS()->SetData("lights", &lightsData[0], sizeof(Light) * (int)lightsData.size());
 			models->at(i).Draw(activeCamera);
 		}
 	}

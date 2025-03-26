@@ -38,7 +38,7 @@ VertexToPixel main( VertexShaderInput input )
 	// Set rest of output
     output.uv = input.uv;
     output.normal = mul((float3x3) worldInverseTranspose, input.normal);
-    output.worldPosition = mul(world, float4(input.localPosition, 1)).xyz;
+    output.worldPosition = mul(world, float4(input.localPosition, 1.0f)).xyz;
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)

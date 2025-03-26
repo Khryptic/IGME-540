@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include <vector>
 #include "GameEntity.h"
+#include "Lights.h"
 
 class Game
 {
@@ -42,5 +43,8 @@ private:
 
 	// Vector to hold pointers to objects
 	std::shared_ptr<std::vector<GameEntity>> models = std::make_shared<std::vector<GameEntity>>();
+
+	// Lighting Data Struct
+	std::vector<Light> lightsData;
 };
 
