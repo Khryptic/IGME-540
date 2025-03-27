@@ -25,7 +25,7 @@ public:
 	// Helper Function
 	void ImGuiRefresh(float deltaTime);
 	void BuildUI();
-	void AddObjects(Material material, float offset);
+	void AddObjects(std::shared_ptr<Material> material, float offset);
 	const char* GetLightType(int Type);
 
 private:
