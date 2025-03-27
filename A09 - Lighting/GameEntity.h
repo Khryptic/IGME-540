@@ -10,10 +10,10 @@
 class GameEntity {
 public:
 	// Constructor
-	GameEntity(Mesh entityMesh, Material material) {
-		mesh = std::make_shared<Mesh>(entityMesh);
+	GameEntity(std::shared_ptr<Mesh> entityMesh, std::shared_ptr<Material> material) {
+		mesh = entityMesh;
 		transform = std::make_shared<Transform>();
-		this->material = std::make_shared<Material>(material);
+		this->material = material;
 	}
 
 	// Getters
