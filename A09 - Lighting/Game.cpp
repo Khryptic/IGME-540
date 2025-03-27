@@ -63,15 +63,15 @@ void Game::Initialize()
 	ImGui_ImplDX11_Init(Graphics::Device.Get(), Graphics::Context.Get());
 
 	// Load Textures and Sampler State
-	CreateWICTextureFromFile(Graphics::Device.Get(), 
-		Graphics::Context.Get(), 
-		L"Assets/Textures/carpet_color.jpg", 
-		nullptr, 
+	CreateWICTextureFromFile(Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		L"Assets/Textures/carpet_color.jpg",
+		nullptr,
 		&carpetSRV);
-	CreateWICTextureFromFile(Graphics::Device.Get(), 
-		Graphics::Context.Get(), 
-		L"Assets/Textures/ice_color.jpg", 
-		nullptr, 
+	CreateWICTextureFromFile(Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		L"Assets/Textures/ice_color.jpg",
+		nullptr,
 		&iceSRV);
 
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -97,42 +97,42 @@ void Game::Initialize()
 	light1.Type = LIGHT_TYPE_DIRECTION;
 	light1.Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	light1.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	light1.Intensity = 0.8f;
+	light1.Intensity = 1.0f;
 
 	Light light2 = {};
 	light2.Type = LIGHT_TYPE_DIRECTION;
 	light2.Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
 	light2.Color = XMFLOAT3(0.4f, 0.9f, 0.7f);
-	light2.Intensity = 0.4f;
+	light2.Intensity = 1.0f;
 
 	Light light3 = {};
 	light3.Type = LIGHT_TYPE_POINT;
-	light3.Range = 10.0f;
-	light3.Position = XMFLOAT3(0.0f, -3.0f, 0.0f);
+	light3.Range = 100.0f;
+	light3.Position = XMFLOAT3(3.0f, 3.0f, 0.0f);
 	light3.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	light3.Intensity = 0.9f;
+	light3.Intensity = 1.0f;
 
 	Light light4 = {};
 	light4.Type = LIGHT_TYPE_DIRECTION;
 	light4.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	light4.Intensity = 1.0f;
 	light4.Color = XMFLOAT3(0.5f, 0.5f, 0.5f);
-	light4.Intensity = 1.4f;
 
 	Light light5 = {};
 	light5.Type = LIGHT_TYPE_SPOT;
-	light5.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	light5.Position = XMFLOAT3(0.0f, -15.0f, 0.0f);
-	light5.Range = 30.0f;
-	light5.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	light5.SpotInnerAngle = XMConvertToRadians(20.0f);
-	light5.SpotOuterAngle = XMConvertToRadians(21.0f);
-	light5.Intensity = 0.9f;
+	light5.Direction = { 0.0f, -1.0f, 0.0f };
+	light5.Range = 4.0f;
+	light5.Position = { 7.5f, 1.0f, 0.0f };
+	light5.Intensity = 1.0f;
+	light5.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	light5.SpotInnerAngle = XMConvertToRadians(10.0f);
+	light5.SpotOuterAngle = XMConvertToRadians(30.0f);
 
 
-	//lightsData.push_back(light1);
-	//lightsData.push_back(light2);
-	//lightsData.push_back(light3);
-	//lightsData.push_back(light4);
+	lightsData.push_back(light1);
+	lightsData.push_back(light2);
+	lightsData.push_back(light3);
+	lightsData.push_back(light4);
 	lightsData.push_back(light5);
 
 	// Helper methods for loading shaders, creating some basic
@@ -501,6 +501,63 @@ void Game::BuildUI() {
 			ImGui::PopID();
 		}
 	}
+	
+	// Lights Data
+	if (ImGui::CollapsingHeader("Lights", 1)) {
+
+		for (int i = 0; i < lightsData.size(); i++) {
+			Light currentLight = lightsData[i];
+			ImGui::PushID(i);
+			if (ImGui::TreeNode(GetLightType(currentLight.Type))){
+				XMFLOAT3 direction = currentLight.Direction;
+				float range = currentLight.Range;
+				XMFLOAT3 position = currentLight.Position;
+				float intensity = currentLight.Intensity;
+				XMFLOAT3 color = currentLight.Color;
+				float spotInnerAngle = XMConvertToDegrees(currentLight.SpotInnerAngle);
+				float spotOuterAngle = XMConvertToDegrees(currentLight.SpotOuterAngle);
+
+				// New options depending on Light type
+				// Intensity and color is shared by all lights
+				ImGui::SliderFloat("Intensity", &intensity, 0.0f, 1.0f);
+				ImGui::ColorEdit3("Color", (float*)&color);
+
+				switch (currentLight.Type)
+				{
+				case LIGHT_TYPE_DIRECTION:
+
+					ImGui::SliderFloat3("Direction", (float*) & direction, -1.0f, 1.0f);
+					break;
+
+				case LIGHT_TYPE_POINT:
+					ImGui::SliderFloat("Range", (float*) &range, 0.0f, 50.0f);
+					ImGui::SliderFloat3("Position", (float*) &position, -20.0f, 20.0f);
+					break;
+
+				case LIGHT_TYPE_SPOT:
+					ImGui::SliderFloat3("Direction", (float*) &direction, -1.0f, 1.0f);
+					ImGui::SliderFloat("Range", (float*) &range, 0.0f, 50.0f);
+					ImGui::SliderFloat3("Position", (float*) &position, -10.0f, 10.0f);
+					ImGui::SliderFloat("Inner Angle (Degrees)", (float*) &spotInnerAngle, 0.0f, 90.0f);
+					ImGui::SliderFloat("Outer Angle (Degrees)", (float*) &spotOuterAngle, 0.0f, 90.0f);
+					break;
+				}
+
+				// Set new data
+				lightsData[i].Direction = direction;
+				lightsData[i].Range = range;
+				lightsData[i].Position = position;
+				lightsData[i].Intensity = intensity;
+				lightsData[i].Color = color;
+				lightsData[i].SpotInnerAngle = XMConvertToRadians(spotInnerAngle);
+				lightsData[i].SpotOuterAngle = XMConvertToRadians(spotOuterAngle);
+
+				ImGui::TreePop();
+			}
+
+			ImGui::PopID();
+		}
+	}
 
 	ImGui::NewLine();	// Separation buffer
 
@@ -574,4 +631,9 @@ void Game::AddObjects(Material material, float offset) {
 	models->at(modelsLength + 4).GetTransform()->SetPosition(XMFLOAT3(-7.5, offset, 0.0));
 	models->at(modelsLength + 5).GetTransform()->SetPosition(XMFLOAT3(5.0, offset, 0.0));
 	models->at(modelsLength + 6).GetTransform()->SetPosition(XMFLOAT3(-5.0, offset, 0.0));
+}
+
+const char* Game::GetLightType(int Type) {
+	const char* LightTypeNames[] = { "Directional", "Point", "Spot" };
+	return LightTypeNames[Type];
 }

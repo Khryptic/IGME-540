@@ -26,6 +26,7 @@ public:
 	void ImGuiRefresh(float deltaTime);
 	void BuildUI();
 	void AddObjects(Material material, float offset);
+	const char* GetLightType(int Type);
 
 private:
 

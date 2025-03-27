@@ -21,15 +21,25 @@ cbuffer ExternalData : register(b0)
 // Calculates the Diffusion Factor of Point and Spot Lights
 float3 CalculateDiffuse(Light light, VertexToPixel input, float3 direction)
 {
-    return dot(input.normal, -direction) *
+    return saturate(dot(input.normal, -direction)) *
 		   light.Color * light.Intensity;
+}
+
+// Calculates the Specularity of the pixel
+float3 CalculateSpecular(Light light, VertexToPixel input, float3 direction)
+{
+    float3 view = normalize(cameraPosition - input.worldPosition);
+    float3 reflection = reflect(direction, input.normal);
+    float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
+	
+    return pow(max(dot(reflection, view), 0.0f), specExponent);
 }
 
 // Calculates the linear falloff of a Spot Light
 float CalculateFalloff(Light light, VertexToPixel input)
 {
 	// Get cos(angle) between pixel and light direction
-    float pixelAngle = saturate(dot(light.Position - input.worldPosition, light.Direction));
+    float pixelAngle = saturate(dot(normalize(light.Position - input.worldPosition), -light.Direction));
 	
 	// Get cosines of angles and calculate range
     float cosOuter = cos(light.SpotOuterAngle);
@@ -48,22 +58,12 @@ float3 CalculateAttenuation(Light light, VertexToPixel input)
 	return att * att;
 }
 
-// Calculates the Specularity of the pixel
-float3 CalculateSpecular(Light light, VertexToPixel input, float3 direction)
-{
-	float3 view = normalize(cameraPosition - input.worldPosition);
-	float3 reflection = reflect(direction, input.normal);
-	float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
-	
-	return pow(max(dot(reflection, view), 0.0f), specExponent);
-}
-
 // Calculates the total light hitting the pixel
 float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 {
 	float3 total = ambient;
 		
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		float3 diffuse = { 0, 0, 0 };
 		float3 specular = { 0, 0, 0 };
@@ -75,13 +75,14 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 			// Directional Light
 			case LIGHT_TYPE_DIRECTION:
 				diffuse = CalculateDiffuse(lights[i], input, lights[i].Direction);
-				specular = CalculateSpecular(lights[i], input, lights[i].Direction);
+                specular = CalculateSpecular(lights[i], input, lights[i].Direction);
 				total += diffuse + specular;
 				break;
 			
 			// Point Light
 			case LIGHT_TYPE_POINT:
-                float3 direction = normalize(lights[i].Position - input.worldPosition);
+                float3 direction = normalize(input.worldPosition - lights[i].Position);
+			
 				diffuse = CalculateDiffuse(lights[i], input, direction);
                 specular = CalculateSpecular(lights[i], input, direction);
                 attenuation = CalculateAttenuation(lights[i], input);
@@ -91,16 +92,16 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 			// Spot Light
 			case LIGHT_TYPE_SPOT:
                 diffuse = CalculateDiffuse(lights[i], input, lights[i].Direction);
-				specular = CalculateSpecular(lights[i], input, lights[i].Direction);
+                specular = CalculateSpecular(lights[i], input, lights[i].Direction);
                 fallOff = CalculateFalloff(lights[i], input);
                 attenuation = CalculateAttenuation(lights[i], input);
-                total += (diffuse + specular) * attenuation * fallOff;
+                total += ((diffuse + specular) * attenuation) * fallOff;
 				break;
 		}
 
 	}
 	
-    return total;
+    return total * surfaceColor.xyz;
 }
 
 // --------------------------------------------------------
