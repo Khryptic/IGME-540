@@ -48,6 +48,7 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iceSRV;
 Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 D3D11_SAMPLER_DESC samplerDesc;
 std::vector<std::shared_ptr<Material>> materials;
+std::vector<std::shared_ptr<Mesh>> meshes;
 XMFLOAT3 ambientColor = {0.1f, 0.1f, 0.25f};
 
 // --------------------------------------------------------
@@ -86,11 +87,20 @@ void Game::Initialize()
 	// Dark Color Style
 	ImGui::StyleColorsDark();
 
+	// Load Meshes
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Cube", FixPath("../../Assets/Models/cube.obj").c_str())));
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Cylinder", FixPath("../../Assets/Models/cylinder.obj").c_str())));
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Helix", FixPath("../../Assets/Models/helix.obj").c_str())));
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Quad", FixPath("../../Assets/Models/quad.obj").c_str())));
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Double-Sided Quad", FixPath("../../Assets/Models/quad_double_sided.obj").c_str())));
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Sphere", FixPath("../../Assets/Models/sphere.obj").c_str())));
+	meshes.push_back(std::make_shared<Mesh>(Mesh("Torus", FixPath("../../Assets/Models/torus.obj").c_str())));
+
 	// Initialize Active Camera
 	activeCamera = cameras.at(0);
 
 	// Initialize Lighting Struct
-	//lightsData = {};
+	lightsData = {};
 
 	//Create lights
 	Light light1 = {};
@@ -185,49 +195,42 @@ void Game::CreateGeometry()
 	// Set the active vertex and pixel shaders via Materials
 	//  - Once you start applying different shaders to different objects,
 	//    these calls will need to happen multiple times per frame
-	Material mainTint = Material(white,
+	materials.push_back(std::make_shared<Material>(Material(white,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str()),
-		0.5f);
-	
-	mainTint.AddTextureSRV("Carpet", carpetSRV);
-	mainTint.AddTextureSRV("Ice", iceSRV);
-	mainTint.AddSampler("Simple", samplerState);
-
-	Material uvMaterial = Material(yellow,
+		0.5f)));
+	materials.push_back(std::make_shared<Material>(Material(yellow,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"UVPixelShader.cso").c_str()),
-		0.5f);
-
-	Material normalMaterial = Material(purple,
+		0.5f)));
+	materials.push_back(std::make_shared<Material>(Material(purple,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"NormalPixelShader.cso").c_str()),
-		1.0f);
-	
-	Material fancyMaterial = Material(white,
+		1.0f)));
+	materials.push_back(std::make_shared<Material>(Material(white,
 		std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str()),
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"FancyPixelShader.cso").c_str()),
-		1.0f);
-	fancyMaterial.AddTextureSRV("Carpet", carpetSRV);
-	fancyMaterial.AddTextureSRV("Ice", iceSRV);
-	fancyMaterial.AddSampler("Simple", samplerState);
+		1.0f)));
 
-	materials.push_back(std::make_shared<Material>(mainTint));
-	materials.push_back(std::make_shared<Material>(uvMaterial));
-	materials.push_back(std::make_shared<Material>(normalMaterial));
-	materials.push_back(std::make_shared<Material>(fancyMaterial));
+	materials[0].get()->AddTextureSRV("Carpet", carpetSRV);
+	materials[0].get()->AddTextureSRV("Ice", iceSRV);
+	materials[0].get()->AddSampler("Simple", samplerState);
+
+	materials[3].get()->AddTextureSRV("Carpet", carpetSRV);
+	materials[3].get()->AddTextureSRV("Ice", iceSRV);
+	materials[3].get()->AddSampler("Simple", samplerState);
 
 	// Top Row with Color Tint
-	//AddObjects(uvMaterial, 4.5);
+	AddObjects(materials[1], 4.5);
 
 	// Middle Row with UV Colors
-	//AddObjects(normalMaterial, 1.5);
+	AddObjects(materials[2], 1.5);
 
 	// Second Middle Row with Normal Colors
-	AddObjects(mainTint, 0);
+	AddObjects(materials[0], -1.5);
 
 	// Bottom Row with Fancy Shader
-	//AddObjects(fancyMaterial, -4.5);
+	AddObjects(materials[3], -4.5);
 }
 
 
@@ -286,7 +289,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Draw ImGui
 	{
-		ImGui::Render(); // Turns this frame’s UI into renderable triangles
+		ImGui::Render(); // Turns this frameâ€™s UI into renderable triangles
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
 	}
 
@@ -612,19 +615,16 @@ void Game::BuildUI() {
 }
 
 // Create Row of Objects
-void Game::AddObjects(Material material, float offset) {
-	int modelsLength = (int) models->size();
+void Game::AddObjects(std::shared_ptr<Material> material, float offset) {
+	int modelsLength = (int)models->size();
+	
+	// Set Meshes, Materials
+	for (int i = 0; i < 7; i++) {
+		models->push_back(GameEntity(meshes.at(i), material));
+	}
 
-	models->push_back(GameEntity(Mesh("Cube", FixPath("../../Assets/Models/cube.obj").c_str()), material));
-	models->push_back(GameEntity(Mesh("Cylinder", FixPath("../../Assets/Models/cylinder.obj").c_str()), material));
-	models->push_back(GameEntity(Mesh("Helix", FixPath("../../Assets/Models/helix.obj").c_str()), material));
-	models->push_back(GameEntity(Mesh("Quad", FixPath("../../Assets/Models/quad.obj").c_str()), material));
-	models->push_back(GameEntity(Mesh("Double-Sided Quad", FixPath("../../Assets/Models/quad_double_sided.obj").c_str()), material));
-	models->push_back(GameEntity(Mesh("Sphere", FixPath("../../Assets/Models/sphere.obj").c_str()), material));
-	models->push_back(GameEntity(Mesh("Torus", FixPath("../../Assets/Models/torus.obj").c_str()), material));
-
-	// Move Models
-	models->at(modelsLength).GetTransform()->SetPosition(XMFLOAT3(-2.5, offset, 0.0)); 
+	// Model Transforms
+	models->at(modelsLength).GetTransform()->SetPosition(XMFLOAT3(-2.5, offset, 0.0));
 	models->at(modelsLength + 1).GetTransform()->SetPosition(XMFLOAT3(2.5, offset, 0.0));
 	models->at(modelsLength + 2).GetTransform()->SetPosition(XMFLOAT3(0.0, offset, 0.0));
 	models->at(modelsLength + 3).GetTransform()->SetPosition(XMFLOAT3(7.5, offset, 0.0));
