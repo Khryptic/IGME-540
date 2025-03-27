@@ -1,3 +1,9 @@
-﻿  Scanning sources for module dependencies...
+﻿  compilation object save succeeded; see E:\School\IGME-540\A09 - Lighting\x64\Debug\PixelShader.cso
+  Scanning sources for module dependencies...
   Game.cpp
+  GameEntity.cpp
+  Main.cpp
+  Generating Code...
+  LINK : E:\School\IGME-540\A09 - Lighting\x64\Debug\A09_Lighting.exe not found or not built by the last incremental link; performing full link
+     Creating library E:\School\IGME-540\A09 - Lighting\x64\Debug\A09_Lighting.lib and object E:\School\IGME-540\A09 - Lighting\x64\Debug\A09_Lighting.exp
   A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A09 - Lighting\x64\Debug\A09_Lighting.exe
