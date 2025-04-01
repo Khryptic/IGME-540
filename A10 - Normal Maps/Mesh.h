@@ -31,6 +31,9 @@ public:
 
 	void Draw();
 
+	// Calculate Tangents
+	void CalculateTangents(Vertex* verts, int numVerts, unsigned int* indices, int numIndices);
+
 	// Creates A Vertex and An Index Buffer
 	void CreateBuffers(const char* name, unsigned int vertexCount, unsigned int indexCount,
 		struct Vertex vertices[], unsigned int indices[]);

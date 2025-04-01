@@ -22,6 +22,7 @@ struct VertexShaderInput
     float3 localPosition : POSITION; // XYZ position
     float2 uv : TEXCOORD; // UV position
     float3 normal : NORMAL; // Normal position
+    float3 tangent : TANGENT; // Tangent vector
 };
 
 // Struct to hold lighting data
