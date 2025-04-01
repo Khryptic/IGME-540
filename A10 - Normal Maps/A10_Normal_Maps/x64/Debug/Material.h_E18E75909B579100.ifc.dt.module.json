@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "A10_Normal_Maps\\x64\\Debug\\Material.obj",
+            "outputs": [
+                "A10_Normal_Maps\\x64\\Debug\\Material.h_E18E75909B579100.ifc.dt.module.json",
+                "A10_Normal_Maps\\x64\\Debug\\Material.h_E18E75909B579100.ifc.dt.d.json",
+                "A10_Normal_Maps\\x64\\Debug\\Material.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "E:\\School\\IGME-540\\A10 - Normal Maps\\Material.h",
+                    "source-path": "e:\\school\\igme-540\\a10 - normal maps\\material.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
