@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "SimpleShader.h"
 #include "Material.h"
+#include "Sky.h"
 
 #include "WICTextureLoader.h"
 #include <DirectXMath.h>
@@ -50,7 +51,8 @@ Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 D3D11_SAMPLER_DESC samplerDesc;
 std::vector<std::shared_ptr<Material>> materials;
 std::vector<std::shared_ptr<Mesh>> meshes;
-XMFLOAT3 ambientColor = {0.1f, 0.1f, 0.25f};
+std::shared_ptr<Sky> skybox;
+XMFLOAT3 ambientColor = {0.9f, 0.8f, 0.76f};
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -106,9 +108,6 @@ void Game::Initialize()
 	// Initialize Active Camera
 	activeCamera = cameras.at(0);
 
-	// Initialize Lighting Struct
-	lightsData = {};
-
 	//Create lights
 	Light light1 = {};
 	light1.Type = LIGHT_TYPE_DIRECTION;
@@ -151,6 +150,17 @@ void Game::Initialize()
 	lightsData.push_back(light3);
 	lightsData.push_back(light4);
 	lightsData.push_back(light5);
+
+	// Create Skybox
+	skybox = std::make_shared<Sky>(Sky(std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"SkyVertexShader.cso").c_str()),
+		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"SkyPixelShader.cso").c_str()),
+		meshes[0], samplerState, 
+		FixPath(L"../../Assets/Skyboxes/right.png").c_str(),
+		FixPath(L"../../Assets/Skyboxes/left.png").c_str(),
+		FixPath(L"../../Assets/Skyboxes/up.png").c_str(),
+		FixPath(L"../../Assets/Skyboxes/down.png").c_str(),
+		FixPath(L"../../Assets/Skyboxes/front.png").c_str(),
+		FixPath(L"../../Assets/Skyboxes/back.png").c_str()));
 
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
@@ -292,6 +302,8 @@ void Game::Draw(float deltaTime, float totalTime)
 			models->at(i).Draw(activeCamera);
 		}
 	}
+
+	skybox->Draw(*activeCamera);
 
 	// Draw ImGui
 	{

@@ -2,10 +2,62 @@
 
 using namespace DirectX;
 
-Sky::Sky(std::shared_ptr<Mesh> geometry, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
+Sky::Sky(std::shared_ptr<SimpleVertexShader> vertexShader, std::shared_ptr<SimplePixelShader> pixelShader, 
+	std::shared_ptr<Mesh> skyMesh, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler,
+	const wchar_t* right,
+	const wchar_t* left,
+	const wchar_t* up,
+	const wchar_t* down,
+	const wchar_t* front,
+	const wchar_t* back)
 {
-	this->geometry = geometry;
+	this->vertexShader = vertexShader;
+	this->pixelShader = pixelShader;
+	this->skyMesh = skyMesh;
 	this->sampler = sampler;
+	this->srv = CreateCubemap(right, left, up, down, front, back);
+	
+	// Setup Rasterizer Description
+	D3D11_RASTERIZER_DESC rastDesc = {};
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+	rastDesc.CullMode = D3D11_CULL_FRONT;
+	Graphics::Device->CreateRasterizerState(&rastDesc, rasterizerOptions.GetAddressOf());
+
+	// Setup Depth Options
+	D3D11_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = true;
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	Graphics::Device->CreateDepthStencilState(&depthDesc, depthOptions.GetAddressOf());
+}
+
+void Sky::Draw(Camera camera) {
+
+	// Change the render states
+	Graphics::Context->RSSetState(rasterizerOptions.Get());
+	Graphics::Context->OMSetDepthStencilState(depthOptions.Get(), 0);
+
+	// Prepare Shaders
+	vertexShader->SetShader();
+	pixelShader->SetShader();
+
+	// Prepare SRV and Sampler
+	pixelShader->SetShaderResourceView("SkyTexture", srv);
+	pixelShader->SetSamplerState("BasicSampler", sampler);
+
+	// Set Vertex Shader View and Projection Matrices
+	vertexShader->SetMatrix4x4("view", camera.GetViewMatrix());
+	vertexShader->SetMatrix4x4("projection", camera.GetProjectionMatrix());
+
+	// Finalize
+	pixelShader->CopyAllBufferData();
+	vertexShader->CopyAllBufferData();
+
+	// Draw Mesh
+	skyMesh->Draw();
+
+	// Reset Render States
+	Graphics::Context->RSSetState(nullptr);
+	Graphics::Context->OMSetDepthStencilState(nullptr, 0);
 }
 
 // --------------------------------------------------------
