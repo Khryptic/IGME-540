@@ -2,9 +2,10 @@
 #include "GGPShadersInclude.hlsli"
 
 // Texture and Sampler Registers
-Texture2D Carpet : register(t0); // Registers for Textures
+Texture2D Rock : register(t0); // Registers for Textures
 Texture2D Ice : register(t1); // Registers for Textures
-SamplerState Simple : register(s0); // Registers for Samplers
+SamplerState Sample : register(s0); // Registers for Samplers
+Texture2D NormalMap : register(t2); // Registers for the Normal Map
 
 // New constant buffer data for use with SimpleShaders
 cbuffer ExternalData : register(b0)
@@ -98,10 +99,29 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
                 total += ((diffuse + specular) * attenuation) * fallOff;
 				break;
 		}
+		
+		// Cut the specular if the diffuse contribution is zero
+		// - any() returns 1 if any component of the param is non-zero
+		// - In other words:
+		// - If the diffuse amount is 0, any(diffuse) returns 0
+		// - If the diffuse amount is != 0, any(diffuse) returns 1
+		// - So when diffuse is 0, specular becomes 0
+        specular *= any(diffuse);
 
 	}
 	
     return total * surfaceColor.xyz;
+}
+
+float3 TransformNormal(VertexToPixel input, float3 unpackedNormal)
+{
+    float3 N = normalize(input.normal);
+    float3 T = normalize(input.tangent);
+    T = normalize(T - N * dot(T, N)); // Gram-Schmidt assumes that T & N are normalized
+    float3 B = cross(T, N);
+    float3x3 TBN = float3x3(T, B, N);
+	
+    return mul(unpackedNormal, TBN); // Order of Multiplication is important
 }
 
 // --------------------------------------------------------
@@ -114,16 +134,24 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
-{
+{	
 	// Return the input with the colorTint from the constant buffer
 	// Pass the color through 
 	// - The values will be interpolated per-pixel by the rasterizer
 	input.uv = input.uv * scale + offset;
-	input.normal = normalize(input.normal);
-	float4 carpetColor = Carpet.Sample(Simple, input.uv);
-	float4 iceColor = Ice.Sample(Simple, input.uv);
-	float4 surfaceColor = colorTint * abs(iceColor - carpetColor);
+	
+	//input.normal = normalize(input.normal);	Older normal calculation
+	// Unpack Normal Map
+    float3 unpackedNormal = NormalMap.Sample(Sample, input.uv).rgb * 2 - 1;
+    unpackedNormal = normalize(unpackedNormal);
+    input.normal = TransformNormal(input, unpackedNormal);
+	
+	// Calculate Lighting
+	float4 rockColor = Rock.Sample(Sample, input.uv);
+	float4 iceColor = Ice.Sample(Sample, input.uv);
+	float4 surfaceColor = colorTint * abs(iceColor - rockColor);
 	float3 totalLight = CalculateLightingTotal(input, surfaceColor);
 	
+	// Return pixel color
 	return float4(totalLight, 1);
 }

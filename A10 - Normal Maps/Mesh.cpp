@@ -10,6 +10,9 @@ Mesh::Mesh(const char* name, unsigned int vertexCount, unsigned int indexCount, 
 	this->vertexCount = vertexCount;
 	this->name = name;
 
+	// Calculate Tangents
+	CalculateTangents(vertices, vertexCount, indices, indexCount);
+
 	// Create a VERTEX BUFFER and INDEX BUFFER
 	CreateBuffers(name, vertexCount, indexCount, vertices, indices);
 }
@@ -265,8 +268,11 @@ Mesh::Mesh(const char* name, const char* fileName) {
 	// *************************************
 
 	// Set variables
-	indexCount = (unsigned int) indices.size();
-	vertexCount = (unsigned int) verts.size();
+	indexCount = (unsigned int)indices.size();
+	vertexCount = (unsigned int)verts.size();
+
+	// Calculate Tangents
+	CalculateTangents(&verts[0], vertCounter, &indices[0], indexCounter);
 
 	// Create Buffers
 	CreateBuffers(fileName, vertexCount, indexCount, &verts[0], &indices[0]);

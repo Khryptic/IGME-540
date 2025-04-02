@@ -16,6 +16,12 @@
       <FullPath>E:\School\IGME-540\A10 - Normal Maps\x64\Debug\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>E:\School\IGME-540\A10 - Normal Maps\x64\Debug\SkyPixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A10 - Normal Maps\x64\Debug\SkyVertexShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>E:\School\IGME-540\A10 - Normal Maps\x64\Debug\UVPixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>

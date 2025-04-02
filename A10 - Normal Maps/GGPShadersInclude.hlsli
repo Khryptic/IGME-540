@@ -39,9 +39,7 @@ struct Light
     float2 Padding; // Purposefully padding to hit the 16-byte boundary
 };
 
-// Struct representing the data we're sending down the pipeline
-// - Should match our pixel shader's input (hence the name: Vertex to Pixel)
-// - At a minimum, we need a piece of data defined tagged as SV_POSITION
+// Struct representing the data we're sending down the pipeline 
 // - The name of the struct itself is unimportant, but should be descriptive
 // - Each variable must have a semantic, which defines its usage
 struct VertexToPixel
@@ -55,6 +53,19 @@ struct VertexToPixel
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
     float3 worldPosition : POSITION;
+    float3 tangent : TANGENT;
+};
+
+// Struct representing the data we're sending down the pipeline for the Skybox
+struct SkyVertexToPixel
+{
+    // Data type
+	//  |
+	//  |   Name          Semantic
+	//  |    |                |
+	//  v    v                v
+    float4 position : SV_POSITION;
+    float3 sampleDir : DIRECTION;
 };
 
 #endif

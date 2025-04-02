@@ -43,8 +43,9 @@ std::vector<std::shared_ptr<Camera>> cameras = { std::make_shared<Camera>(Camera
 											 std::make_shared<Camera>(Camera({3.0f, 2.0f, -2.0f}, Window::AspectRatio(), 90.0f)) };
 
 // Textures
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> carpetSRV;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockSRV;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iceSRV;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV;
 Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 D3D11_SAMPLER_DESC samplerDesc;
 std::vector<std::shared_ptr<Material>> materials;
@@ -66,14 +67,20 @@ void Game::Initialize()
 	// Load Textures and Sampler State
 	CreateWICTextureFromFile(Graphics::Device.Get(),
 		Graphics::Context.Get(),
-		L"Assets/Textures/carpet_color.jpg",
+		L"Assets/Textures/rock.png",
 		nullptr,
-		&carpetSRV);
+		&rockSRV);
 	CreateWICTextureFromFile(Graphics::Device.Get(),
 		Graphics::Context.Get(),
 		L"Assets/Textures/ice_color.jpg",
 		nullptr,
 		&iceSRV);
+
+	CreateWICTextureFromFile(Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		L"Assets/Textures/rock_normals.png",
+		nullptr,
+		&normalSRV);
 
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -212,13 +219,12 @@ void Game::CreateGeometry()
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"FancyPixelShader.cso").c_str()),
 		1.0f)));
 
-	materials[0].get()->AddTextureSRV("Carpet", carpetSRV);
-	materials[0].get()->AddTextureSRV("Ice", iceSRV);
-	materials[0].get()->AddSampler("Simple", samplerState);
+	materials[0].get()->AddTextureSRV("Rock", rockSRV);
+	materials[0].get()->AddTextureSRV("NormalMap", normalSRV);
+	materials[0].get()->AddSampler("Sample", samplerState);
 
-	materials[3].get()->AddTextureSRV("Carpet", carpetSRV);
 	materials[3].get()->AddTextureSRV("Ice", iceSRV);
-	materials[3].get()->AddSampler("Simple", samplerState);
+	materials[3].get()->AddSampler("Sample", samplerState);
 
 	// Top Row with Color Tint
 	AddObjects(materials[1], 4.5);
