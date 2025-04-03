@@ -76,6 +76,7 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 		{  
 			// Directional Light
 			case LIGHT_TYPE_DIRECTION:
+			
 				diffuse = CalculateDiffuse(lights[i], input, lights[i].Direction);
                 specular = CalculateSpecular(lights[i], input, lights[i].Direction);
 				total += diffuse + specular;
