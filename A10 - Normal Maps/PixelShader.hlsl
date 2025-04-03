@@ -70,6 +70,7 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 		float3 specular = { 0, 0, 0 };
         float3 attenuation = { 0, 0, 0 };
         float fallOff = 0;
+        float3 direction = normalize(lights[i].Direction);
 			
 		switch (lights[i].Type)
 		{  
@@ -82,7 +83,7 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor)
 			
 			// Point Light
 			case LIGHT_TYPE_POINT:
-                float3 direction = normalize(input.worldPosition - lights[i].Position);
+                direction = normalize(input.worldPosition - lights[i].Position);
 			
 				diffuse = CalculateDiffuse(lights[i], input, direction);
                 specular = CalculateSpecular(lights[i], input, direction);
