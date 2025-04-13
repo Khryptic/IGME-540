@@ -50,6 +50,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     // New Color Based on Noise
     float4 newColor = colorTint * float4(random(input.screenPosition.yz), random(input.screenPosition.xy), random(input.screenPosition.xz), 1);
     float4 IceColor = Ice.Sample(Simple, input.uv);
+    float4 TotalColor = IceColor * newColor;
 	       
-    return IceColor * newColor;
+    return TotalColor;
 }
