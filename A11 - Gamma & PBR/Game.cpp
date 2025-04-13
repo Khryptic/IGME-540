@@ -44,9 +44,11 @@ std::vector<std::shared_ptr<Camera>> cameras = { std::make_shared<Camera>(Camera
 											 std::make_shared<Camera>(Camera({3.0f, 2.0f, -2.0f}, Window::AspectRatio(), 90.0f)) };
 
 // Textures
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockSRV;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iceSRV;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeSRV;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughSRV;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metalSRV;
 Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 D3D11_SAMPLER_DESC samplerDesc;
 std::vector<std::shared_ptr<Material>> materials;
@@ -69,20 +71,31 @@ void Game::Initialize()
 	// Load Textures and Sampler State
 	CreateWICTextureFromFile(Graphics::Device.Get(),
 		Graphics::Context.Get(),
-		L"Assets/Textures/rock.png",
-		nullptr,
-		&rockSRV);
-	CreateWICTextureFromFile(Graphics::Device.Get(),
-		Graphics::Context.Get(),
 		L"Assets/Textures/ice_color.jpg",
 		nullptr,
 		&iceSRV);
 
+	// Bronze
 	CreateWICTextureFromFile(Graphics::Device.Get(),
 		Graphics::Context.Get(),
-		L"Assets/Textures/rock_normals.png",
+		L"Assets/Textures/bronze_albedo.png",
+		nullptr,
+		&bronzeSRV);
+	CreateWICTextureFromFile(Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		L"Assets/Textures/bronze_normals.png",
 		nullptr,
 		&normalSRV);
+	CreateWICTextureFromFile(Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		L"Assets/Textures/bronze_roughness.png",
+		nullptr,
+		&roughSRV);
+	CreateWICTextureFromFile(Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		L"Assets/Textures/bronze_metal.png",
+		nullptr,
+		&metalSRV);
 
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -229,8 +242,10 @@ void Game::CreateGeometry()
 		std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"FancyPixelShader.cso").c_str()),
 		1.0f)));
 
-	materials[0].get()->AddTextureSRV("Rock", rockSRV);
+	materials[0].get()->AddTextureSRV("Albedo", bronzeSRV);
 	materials[0].get()->AddTextureSRV("NormalMap", normalSRV);
+	materials[0].get()->AddTextureSRV("RoughnessMap", roughSRV);
+	materials[0].get()->AddTextureSRV("MetalnessMap", metalSRV);
 	materials[0].get()->AddSampler("Sample", samplerState);
 
 	materials[3].get()->AddTextureSRV("Ice", iceSRV);

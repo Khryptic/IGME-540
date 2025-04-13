@@ -2,21 +2,22 @@
 #include "GGPShadersInclude.hlsli"
 
 // Texture and Sampler Registers
-Texture2D Rock : register(t0); // Registers for Textures
-Texture2D Ice : register(t1); // Registers for Textures
-SamplerState Sample : register(s0); // Registers for Samplers
-Texture2D NormalMap : register(t2); // Registers for the Normal Map
+Texture2D Albedo : register(t0);		// Registers for the Textures
+Texture2D NormalMap : register(t1);		
+Texture2D RoughnessMap : register(t2);
+Texture2D MetalnessMap : register(t3);
+SamplerState Sample : register(s0);		// Registers for Samplers
 
 // New constant buffer data for use with SimpleShaders
 cbuffer ExternalData : register(b0)
 {
-	float4 colorTint	 : COLOR;
-	float2 scale		 : TEXCOORD;
-	float2 offset	     : TEXCOOD;
-	float3 cameraPosition : POSITION;
-	float roughness : SCALAR;
-	float3 ambient : COLOR;
-	Light lights[5] : LIGHT;
+	float4 colorTint		: COLOR;
+	float2 scale			: TEXCOORD;
+	float2 offset			: TEXCOOD;
+	float3 cameraPosition	: POSITION;
+	float roughness			: SCALAR;
+	float3 ambient			: COLOR;
+	Light lights[5]			: LIGHT;
 };
 
 // Calculates the Diffusion Factor of Point and Spot Lights
@@ -137,10 +138,22 @@ float3 TransformNormal(VertexToPixel input, float3 unpackedNormal)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {	
-	// Return the input with the colorTint from the constant buffer
-	// Pass the color through 
-	// - The values will be interpolated per-pixel by the rasterizer
-	input.uv = input.uv * scale + offset;
+
+	//Constants
+	// A constant Fresnel value for non-metals (glass and plastic have values of about 0.04)
+    static const float F0_NON_METAL = 0.04f;
+	
+	// Minimum roughness for when spec distribution function denominator goes to zero
+    static const float MIN_ROUGHNESS = 0.0000001f; // 6 zeros after decimal
+	
+    static const float PI = 3.14159265359f;
+
+    input.uv = input.uv * scale + offset;
+	
+	// Roughness and Metalness
+    float roughness = RoughnessMap.Sample(Sample, input.uv).r;
+    float metalness = MetalnessMap.Sample(Sample, input.uv).r;
+	
 	
 	//input.normal = normalize(input.normal);	Older normal calculation
 	// Unpack Normal Map
@@ -148,12 +161,15 @@ float4 main(VertexToPixel input) : SV_TARGET
     unpackedNormal = normalize(unpackedNormal);
     input.normal = TransformNormal(input, unpackedNormal);
 	
-	// Calculate Lighting
-	float4 rockColor = Rock.Sample(Sample, input.uv);
-	float4 iceColor = Ice.Sample(Sample, input.uv);
-	float4 surfaceColor = colorTint * abs(iceColor - rockColor);
+	// Calculate Albedo Color
+    float4 albedoColor = float4(pow(Albedo.Sample(Sample, input.uv).rgb, 2.2f), 1);
+	
+	// Specular color determination 
+    float3 specularColor = lerp(F0_NON_METAL, albedoColor.rgb, metalness);
+	
+	float4 surfaceColor = colorTint * abs(albedoColor);
 	float3 totalLight = CalculateLightingTotal(input, surfaceColor);
 	
 	// Return pixel color
-	return float4(totalLight, 1);
+    return float4(pow(totalLight, 1.0f / 2.2f), 1);
 }
