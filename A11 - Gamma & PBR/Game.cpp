@@ -54,7 +54,7 @@ D3D11_SAMPLER_DESC samplerDesc;
 std::vector<std::shared_ptr<Material>> materials;
 std::vector<std::shared_ptr<Mesh>> meshes;
 std::shared_ptr<Sky> skybox;
-XMFLOAT3 ambientColor = {0.9f, 0.8f, 0.76f};
+XMFLOAT3 ambientColor = {0.0f, 0.0f, 0.0f};
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
