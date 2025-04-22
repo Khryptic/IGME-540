@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "A11_Gamma_PBR\\x64\\Debug\\Material.obj",
+            "outputs": [
+                "A11_Gamma_PBR\\x64\\Debug\\Material.h_3814CE58704B977C.ifc.dt.module.json",
+                "A11_Gamma_PBR\\x64\\Debug\\Material.h_3814CE58704B977C.ifc.dt.d.json",
+                "A11_Gamma_PBR\\x64\\Debug\\Material.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "E:\\School\\IGME-540\\A12 - Shadow Mapping\\Material.h",
+                    "source-path": "e:\\school\\igme-540\\a12 - shadow mapping\\material.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
