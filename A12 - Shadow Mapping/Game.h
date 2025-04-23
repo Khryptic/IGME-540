@@ -29,6 +29,8 @@ public:
 	const char* GetLightType(int Type);
 	void CreateLights();
 	void CreateShadowMap();
+	void CreateLightViewMatrix(Light light);
+	void CreateLightProjectionMatrix(Light light);
 
 private:
 
@@ -57,5 +59,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
 	DirectX::XMFLOAT4X4 lightViewMatrix;
 	DirectX::XMFLOAT4X4 lightProjectionMatrix;
+	float lightProjectionSize;
 };
 

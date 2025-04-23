@@ -47,5 +47,4 @@ private:
 	unsigned int indexCount;	// Used when drawing
 	unsigned int vertexCount;	// Good for the UI
 	const char* name;			// Name of Mesh
-
 };

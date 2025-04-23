@@ -6,7 +6,9 @@ Texture2D Albedo : register(t0);		// Registers for the Textures
 Texture2D NormalMap : register(t1);		
 Texture2D RoughnessMap : register(t2);
 Texture2D MetalnessMap : register(t3);
-SamplerState Sample : register(s0);		// Registers for Samplers
+Texture2D ShadowMap : register(t4);     // Shadow Map Texture
+SamplerState Sampler : register(s0);		// Registers for Samplers
+SamplerComparisonState ShadowSampler : register(s1); // Shadow Map Sampler
 
 //Constants
 // A constant Fresnel value for non-metals (glass and plastic have values of about 0.04)
@@ -34,8 +36,6 @@ float DiffusePBR(float3 normal, float3 dirToLight)
 {
     return saturate(dot(normal, dirToLight));
 }
-
-
 
 // Calculates diffuse amount based on energy conservation
 //
@@ -189,7 +189,7 @@ float3 CalculateAttenuation(Light light, VertexToPixel input)
 }
 
 // Calculates the total light hitting the pixel
-float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 specularColor, float metalness, float roughness)
+float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 specularColor, float metalness, float roughness, float shadowAmount)
 {
     float3 total = ambient;
 		
@@ -198,6 +198,7 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 s
         float3 diffuse = { 0, 0, 0 };
         float3 specular = { 0, 0, 0 };
         float3 attenuation = { 0, 0, 0 };
+        float3 result = { 0, 0, 0 };
         float fallOff = 0;
         float3 F;
         float3 direction;
@@ -218,7 +219,15 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 s
                 balancedDiff = DiffuseEnergyConserve(diffuse, F, metalness);
                 
                 // Combine the final diffuse and specular values for this light
-                total += (balancedDiff * surfaceColor.rgb + specular) * lights[i].Intensity * lights[i].Color;
+                result = (balancedDiff * surfaceColor.rgb + specular) * lights[i].Intensity * lights[i].Color;
+            
+                if (i == 0)
+                {
+                    result += shadowAmount * 0.1; // Apply shadow amount to the first light
+                                                  // Not sure why shadowAmount does not work when multiplied
+                }
+            
+                total += result;
                 break;
 			
 			// Point Light
@@ -234,7 +243,8 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 s
                 attenuation = CalculateAttenuation(lights[i], input);
                 
                 // Combine the final diffuse and specular values for this light
-                total += (balancedDiff * surfaceColor.rgb + specular) * lights[i].Intensity * lights[i].Color * attenuation;
+                result = (balancedDiff * surfaceColor.rgb + specular) * lights[i].Intensity * lights[i].Color * attenuation;
+                total += result;
                 break;
 			
 			// Spot Light
@@ -252,7 +262,8 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 s
                 fallOff = CalculateFalloff(lights[i], input);
                 
                 // Combine the final diffuse and specular values for this light
-                total += ((balancedDiff * surfaceColor.rgb + specular) * lights[i].Intensity * lights[i].Color * attenuation) * fallOff;
+                result = ((balancedDiff * surfaceColor.rgb + specular) * lights[i].Intensity * lights[i].Color * attenuation) * fallOff;
+                total += result;
                 break;
         }
 		
@@ -263,10 +274,9 @@ float3 CalculateLightingTotal(VertexToPixel input, float4 surfaceColor, float3 s
 		// - If the diffuse amount is != 0, any(diffuse) returns 1
 		// - So when diffuse is 0, specular becomes 0
         specular *= any(diffuse);
-
     }
 	
-    return total * surfaceColor.xyz;
+    return total * surfaceColor.rgb;
 }
 
 float3 TransformNormal(VertexToPixel input, float3 unpackedNormal)
@@ -291,21 +301,38 @@ float3 TransformNormal(VertexToPixel input, float3 unpackedNormal)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {	
+    // Check Shadow Map
+	// Perform the perspective divide (divide by W) ourselves
+    input.shadowMapPosition /= input.shadowMapPosition.w;
+    
+    // Convert the normalized device coordinates to UVs for sampling
+    float2 shadowUV = input.shadowMapPosition.xy * 0.5f + 0.5f;
+    shadowUV.y = 1 - shadowUV.y; // Flip the Y
+    
+    // Grab the distances we need: light-to-pixel and closest-surface
+    float distToLight = input.shadowMapPosition.z;
+
+    // Get a ratio of comparison results using SampleCmpLevelZero()
+    float shadowAmount = ShadowMap.SampleCmpLevelZero(
+        ShadowSampler,
+        shadowUV,
+        distToLight);
+    
+    // Get UV position of pixel
     input.uv = input.uv * scale + offset;
-	
+    
 	// Roughness and Metalness
-    float roughness = RoughnessMap.Sample(Sample, input.uv).r;
-    float metalness = MetalnessMap.Sample(Sample, input.uv).r;
-	
+    float roughness = RoughnessMap.Sample(Sampler, input.uv).r;
+    float metalness = MetalnessMap.Sample(Sampler, input.uv).r;
 	
 	//input.normal = normalize(input.normal);	Older normal calculation
 	// Unpack Normal Map
-    float3 unpackedNormal = NormalMap.Sample(Sample, input.uv).rgb * 2 - 1;
+    float3 unpackedNormal = NormalMap.Sample(Sampler, input.uv).rgb * 2 - 1;
     unpackedNormal = normalize(unpackedNormal);
     input.normal = TransformNormal(input, unpackedNormal);
 	
 	// Calculate Albedo Color
-    float3 albedoColor = pow(Albedo.Sample(Sample, input.uv).rgb, 2.2f);
+    float3 albedoColor = pow(Albedo.Sample(Sampler, input.uv).rgb, 2.2f);
 	
 	// Specular color determination 
     float3 specularColor = lerp(F0_NON_METAL, albedoColor.rgb, metalness);
@@ -313,7 +340,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float4 surfaceColor = colorTint * float4(albedoColor, 1);
 	
 	// Old Fresnel calculation
-	float3 totalLight = CalculateLightingTotal(input, surfaceColor, specularColor, metalness, roughness);
+	float3 totalLight = CalculateLightingTotal(input, surfaceColor, specularColor, metalness, roughness, shadowAmount);
 	
 	// Return pixel color
     return float4(pow(totalLight, 1.0f / 2.2f), 1);

@@ -294,6 +294,7 @@ void Mesh::Draw() {
 	//  - This will use all currently set Direct3D resources (shaders, buffers, etc)
 	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
 	//     vertices in the currently set VERTEX BUFFER
+	UINT indexCount = GetIndexCount(); // The number of indices to use
 	Graphics::Context->DrawIndexed(
 		indexCount,     // The number of indices to use (we could draw a subset if we wanted)
 		0,     // Offset to the first index we want to use
