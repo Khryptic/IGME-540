@@ -54,6 +54,7 @@ struct VertexToPixel
     float3 normal : NORMAL;
     float3 worldPosition : POSITION;
     float3 tangent : TANGENT;
+    float4 shadowMapPosition : SHADOW_POSITION;
 };
 
 // Struct representing the data we're sending down the pipeline for the Skybox

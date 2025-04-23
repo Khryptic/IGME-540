@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "A12_Shad.499f9319\\x64\\Debug\\Material.h.obj",
+            "outputs": [
+                "E:\\School\\IGME-540\\A12 - Shadow Mapping\\A12_Shad.499f9319\\x64\\Debug\\vc143.pdb",
+                "A12_Shad.499f9319\\x64\\Debug\\",
+                "E:\\School\\IGME-540\\A12 - Shadow Mapping\\A12_Shad.499f9319\\x64\\Debug\\Material.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "Material.h",
+                    "source-path": "e:\\school\\igme-540\\a12 - shadow mapping\\material.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
