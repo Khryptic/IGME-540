@@ -31,6 +31,8 @@ public:
 	void CreateShadowMap();
 	void CreateLightViewMatrix(Light light);
 	void CreateLightProjectionMatrix(Light light);
+	void CreatePPResources();
+	void ResetScreenTargets();
 
 private:
 
@@ -60,5 +62,14 @@ private:
 	DirectX::XMFLOAT4X4 lightViewMatrix;
 	DirectX::XMFLOAT4X4 lightProjectionMatrix;
 	float lightProjectionSize;
+
+	// Resources that are shared among all post processes
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppSampler;
+	std::shared_ptr<SimpleVertexShader> ppVS;
+
+	// Resources that are tied to a blur post process
+	std::shared_ptr<SimplePixelShader> ppPS;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> ppRTV; // For rendering
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppSRV; // For sampling
 };
 

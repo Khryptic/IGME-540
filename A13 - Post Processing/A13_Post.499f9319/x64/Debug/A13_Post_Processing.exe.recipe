@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\A13_Post_Processing.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\FancyPixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\FullscreenVertexShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\NormalPixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\PixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\PPPixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\ShadowMapVertexShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\SkyPixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\SkyVertexShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\UVPixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\School\IGME-540\A13 - Post Processing\x64\Debug\VertexShader.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

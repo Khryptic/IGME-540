@@ -1,0 +1,8 @@
+﻿  Scanning sources for module dependencies...
+  Game.cpp
+E:\School\IGME-540\A13 - Post Processing\Game.cpp(41,16): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+E:\School\IGME-540\A13 - Post Processing\Game.cpp(376,30): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+E:\School\IGME-540\A13 - Post Processing\Game.cpp(672,54): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+E:\School\IGME-540\A13 - Post Processing\Game.cpp(672,48): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+     Creating library E:\School\IGME-540\A13 - Post Processing\x64\Debug\A13_Post_Processing.lib and object E:\School\IGME-540\A13 - Post Processing\x64\Debug\A13_Post_Processing.exp
+  A02_Dear_ImGui.vcxproj -> E:\School\IGME-540\A13 - Post Processing\x64\Debug\A13_Post_Processing.exe

@@ -32,9 +32,13 @@ using namespace DirectX;
 bool showDemo = 0;	// Whether or not to show demo window
 const char* starterNames[] = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" }; // Popup list options
 int selectedStarter = -1; // Index of chosen name
-float windowColor[4] = {0.4f, 0.6f, 0.75f, 0.0f}; // Color Vector
+float windowColor[4] = {0.4f, 0.6f, 0.75f, 1.0f}; // Color Vector
+float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f}; // Color Vector
 bool stopConfirmation = 0;
 std::vector<float> shadowResolution = { 8192.0f, 8192.0f };
+bool usePP;
+float blurRad = 0.0f;
+int pixelation = 1000.0f;
 
 // Cameras
 std::shared_ptr<Camera> activeCamera;
@@ -103,6 +107,12 @@ void Game::Initialize()
 	shadowVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"ShadowMapVertexShader.cso").c_str());
 	Game::CreateShadowMap();
 
+	// Create Post Process Resources
+	ppVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"FullscreenVertexShader.cso").c_str());
+	ppPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"PPPixelShader.cso").c_str());
+	CreatePPResources();
+
+	// Create Texture sampler for models
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -110,7 +120,7 @@ void Game::Initialize()
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	Graphics::Device.Get()->CreateSamplerState(&samplerDesc, &samplerState);
+	Graphics::Device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
 
 	// Dark Color Style
 	ImGui::StyleColorsDark();
@@ -249,6 +259,11 @@ void Game::OnResize()
 			cameras[i]->UpdateProjectionMatrix(Window::AspectRatio());
 		}
 	}
+
+	if (Graphics::Device != NULL) {
+		ResetScreenTargets();
+	}
+	
 }
 
 
@@ -328,6 +343,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::DepthBufferDSV.Get());
 	Graphics::Context->RSSetState(0);
 
+	if (usePP) {
+		Graphics::Context->ClearRenderTargetView(ppRTV.Get(), clearColor);
+		Graphics::Context->OMSetRenderTargets(1, ppRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+	}
+
 	// Draw Meshes
 	for (int i = 0; i < models->size(); i++) {
 		models->at(i).GetMaterial()->GetPS()->SetFloat3("ambient", ambientColor);
@@ -340,6 +360,25 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	skybox->Draw(*activeCamera);
+
+	// Post Processing
+	if (usePP) {
+		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
+
+		// Activate shaders and bind resources
+		// Also set any required cbuffer data (not shown)
+		ppVS->SetShader();
+		ppPS->SetShader();
+		ppPS->SetShaderResourceView("Pixels", ppSRV.Get());
+		ppPS->SetSamplerState("ClampSampler", ppSampler.Get());
+		ppPS->SetFloat("pixelWidth", 1.0f / Window::Width());
+		ppPS->SetFloat("pixelHeight", 1.0f / Window::Height());
+		ppPS->SetInt("blurRadius", blurRad);
+		ppPS->SetInt("pixelation", pixelation);
+		ppPS->CopyAllBufferData();
+
+		Graphics::Context->Draw(3, 0); // Draw exactly 3 vertices (one triangle)
+	}
 
 	// Draw ImGui
 	{
@@ -623,6 +662,17 @@ void Game::BuildUI() {
 		ImGui::Image((ImTextureID)shadowSRV.Get(), ImVec2(512, 512));
 	}
 
+	// Post Processing
+	if (ImGui::CollapsingHeader("Post Processing", 1))
+	{
+		ImGui::Checkbox("Use Post Processing", &usePP);
+
+		if (usePP) {
+			ImGui::SliderFloat("Blur Radius", &blurRad, 0.0f, 20.0f);
+			ImGui::SliderInt("Pixelation", &pixelation, 1.0f, 1000.0f);
+		}
+	}
+
 	ImGui::NewLine();	// Separation buffer
 
 	// Changes whether or not demo window will be shown with a popup
@@ -687,10 +737,10 @@ void Game::AddObjects(std::shared_ptr<Material> material, float offset) {
 	// Model Transforms
 	models->at(modelsLength).GetTransform()->SetPosition(XMFLOAT3(-2.5, offset, 0.0));
 	models->at(modelsLength + 1).GetTransform()->SetPosition(XMFLOAT3(2.5, offset, 0.0));
-	models->at(modelsLength + 2).GetTransform()->SetPosition(XMFLOAT3(0.0, offset - 1.0, 0.0));
+	models->at(modelsLength + 2).GetTransform()->SetPosition(XMFLOAT3(0.0, offset - 1.0f, 0.0));
 	models->at(modelsLength + 3).GetTransform()->SetPosition(XMFLOAT3(7.5, offset, 0.0));
 	models->at(modelsLength + 4).GetTransform()->SetPosition(XMFLOAT3(-7.5, offset, 0.0));
-	models->at(modelsLength + 5).GetTransform()->SetPosition(XMFLOAT3(5.0, offset - 1.3, 0.0));
+	models->at(modelsLength + 5).GetTransform()->SetPosition(XMFLOAT3(5.0, offset - 1.3f, 0.0));
 	models->at(modelsLength + 6).GetTransform()->SetPosition(XMFLOAT3(-5.0, offset, 0.0));
 }
 
@@ -819,4 +869,57 @@ void Game::CreateLightProjectionMatrix(Light light) {
 		1.0f,
 		100.0f);
 	XMStoreFloat4x4(&lightProjectionMatrix, lightProjection);
+}
+
+void Game::CreatePPResources() {
+	// Sampler
+	D3D11_SAMPLER_DESC ppSampDesc = {};
+	ppSampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ppSampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ppSampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ppSampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	ppSampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	Graphics::Device->CreateSamplerState(&ppSampDesc, ppSampler.GetAddressOf());
+
+	// Describe the texture we're creating
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = Window::Width();
+	textureDesc.Height = Window::Height();
+	textureDesc.ArraySize = 1;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.MipLevels = 1;
+	textureDesc.MiscFlags = 0;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	// Create the resource (no need to track it after the views are created below)
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppTexture;
+	Graphics::Device->CreateTexture2D(&textureDesc, 0, ppTexture.GetAddressOf());
+
+	// Create the Render Target View
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = textureDesc.Format;
+	rtvDesc.Texture2D.MipSlice = 0;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	Graphics::Device->CreateRenderTargetView(
+		ppTexture.Get(),
+		&rtvDesc,
+		ppRTV.ReleaseAndGetAddressOf());
+
+	// Create the Shader Resource View
+	// By passing it a null description for the SRV, we
+	// get a "default" SRV that has access to the entire resource
+	Graphics::Device->CreateShaderResourceView(
+		ppTexture.Get(),
+		0,
+		ppSRV.ReleaseAndGetAddressOf());
+}
+
+void Game::ResetScreenTargets() {
+	ppRTV.Reset();
+	ppSRV.Reset();
+	CreatePPResources();
 }
